@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>waldo — Persona Config</title>
-  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script src="https://unpkg.com/vue@3.4.21/dist/vue.global.prod.js"></script>
   <style>
     * {
       margin: 0;
@@ -314,30 +314,34 @@
       <p>Edit personas visually. Sync to GitHub via API.</p>
     </header>
 
-    <div class="auth-section" v-if="!authenticated">
-      <h2>Connect Services</h2>
-      <div style="margin-bottom: 20px;">
+    <div class="auth-section">
+      <h2>GitHub Sync <span style="font-size: 12px; font-weight: normal; color: #888;">(optional — not required for local editing)</span></h2>
+      <div v-if="!authenticated">
         <p style="margin-bottom: 10px; font-size: 13px;">
-          <strong>GitHub:</strong> Read/write persona files
-          <a href="https://github.com/settings/tokens/new?scopes=repo&description=waldo-ui" target="_blank">Create token →</a>
+          <strong>GitHub:</strong> Provide a token to enable saving personas to GitHub. Use a
+          <a href="https://github.com/settings/tokens/new?description=waldo-ui" target="_blank" rel="noopener noreferrer">fine-grained PAT</a>
+          with the minimum repository permissions needed.
+          Tokens are stored only for the current browser session and cleared when you close the tab.
         </p>
-        <input v-model="ghToken" type="password" placeholder="ghp_..." />
+        <input v-model="ghToken" type="password" placeholder="ghp_... or github_pat_..." style="max-width:400px;" />
+        <div>
+          <p style="margin-bottom: 10px; margin-top: 10px; font-size: 13px;">
+            <strong>S3 (optional):</strong> Sync personas to S3 bucket
+          </p>
+          <input v-model="awsAccessKey" type="password" placeholder="AWS Access Key (optional)" />
+          <input v-model="awsSecretKey" type="password" placeholder="AWS Secret Key (optional)" />
+          <input v-model="s3Bucket" type="text" placeholder="S3 Bucket (optional)" />
+        </div>
+        <button @click="authenticate" style="margin-top: 10px;">Connect</button>
       </div>
-      <div>
-        <p style="margin-bottom: 10px; font-size: 13px;">
-          <strong>S3 (optional):</strong> Sync personas to S3 bucket
-        </p>
-        <input v-model="awsAccessKey" type="password" placeholder="AWS Access Key (optional)" />
-        <input v-model="awsSecretKey" type="password" placeholder="AWS Secret Key (optional)" />
-        <input v-model="s3Bucket" type="text" placeholder="S3 Bucket (optional)" />
+      <div v-else>
+        <div class="status success" style="display:inline-block; margin-right: 10px;">✓ Connected to GitHub</div>
+        <button @click="logout" class="btn btn-secondary" style="font-size: 13px; padding: 5px 12px;">Disconnect</button>
       </div>
-      <button @click="authenticate" style="margin-top: 10px;">Connect</button>
       <div v-if="message" :class="['status', message.type]">{{ message.text }}</div>
     </div>
 
-    <div v-else>
-      <div class="status success">✓ Authenticated</div>
-
+    <div>
       <div class="containers">
         <div class="container">
           <h2>Meta</h2>
@@ -394,29 +398,29 @@
 
           <h2 style="margin-top: 30px;">Voice</h2>
           <div class="field-group">
-            <label>Avoid Words (comma-separated)</label>
+            <label>Avoid Words</label>
             <div class="array-input">
               <input v-model="newAvoidWord" @keyup.enter="addAvoidWord" type="text" placeholder="Type and press Enter" />
               <button @click="addAvoidWord">Add</button>
             </div>
             <div class="tags">
-              <div class="tag" v-for="(word, idx) in persona.voice.avoid_words" :key="idx">
+              <div class="tag" v-for="word in persona.voice.avoid_words" :key="word">
                 {{ word }}
-                <button @click="removeAvoidWord(idx)">×</button>
+                <button @click="removeAvoidWord(word)" :aria-label="'Remove avoid word: ' + word">×</button>
               </div>
             </div>
           </div>
 
           <div class="field-group">
-            <label>Prefer Words (comma-separated)</label>
+            <label>Prefer Words</label>
             <div class="array-input">
               <input v-model="newPreferWord" @keyup.enter="addPreferWord" type="text" placeholder="Type and press Enter" />
               <button @click="addPreferWord">Add</button>
             </div>
             <div class="tags">
-              <div class="tag" v-for="(word, idx) in persona.voice.prefer_words" :key="idx">
+              <div class="tag" v-for="word in persona.voice.prefer_words" :key="word">
                 {{ word }}
-                <button @click="removePreferWord(idx)">×</button>
+                <button @click="removePreferWord(word)" :aria-label="'Remove prefer word: ' + word">×</button>
               </div>
             </div>
           </div>
@@ -428,9 +432,9 @@
               <button @click="addPhrase">Add</button>
             </div>
             <div class="tags">
-              <div class="tag" v-for="(phrase, idx) in persona.voice.custom_phrases" :key="idx">
+              <div class="tag" v-for="phrase in persona.voice.custom_phrases" :key="phrase">
                 {{ phrase }}
-                <button @click="removePhrase(idx)">×</button>
+                <button @click="removePhrase(phrase)" :aria-label="'Remove phrase: ' + phrase">×</button>
               </div>
             </div>
           </div>
@@ -454,8 +458,7 @@
         <button class="btn btn-primary" @click="copyToClipboard">Copy JSON</button>
         <button class="btn btn-secondary" @click="downloadMeml">Download MEML</button>
         <button class="btn btn-secondary" @click="loadFromMeml">Load MEML File</button>
-        <button class="btn btn-secondary" @click="saveTos3" v-if="awsAccessKey">Save to S3</button>
-        <button class="btn btn-secondary" @click="logout">Logout</button>
+        <button class="btn btn-secondary" @click="saveTos3" v-if="awsAccessKey && authenticated">Save to S3</button>
       </div>
 
       <div v-if="message" :class="['status', message.type]">{{ message.text }}</div>
@@ -463,7 +466,7 @@
   </div>
 
   <script>
-    const { createApp, ref, computed } = Vue;
+    const { createApp, ref, computed, onMounted } = Vue;
 
     createApp({
       setup() {
@@ -517,17 +520,29 @@
           return JSON.stringify(persona.value, null, 2);
         });
 
-        const authenticate = () => {
-          if (!ghToken.value.startsWith('ghp_')) {
-            message.value = { type: 'error', text: 'Invalid GitHub token format' };
+        const authenticate = async () => {
+          if (!ghToken.value.startsWith('ghp_') && !ghToken.value.startsWith('github_pat_')) {
+            message.value = { type: 'error', text: 'Invalid GitHub token format. Expected ghp_... or github_pat_...' };
             return;
           }
-          authenticated.value = true;
-          message.value = { type: 'success', text: 'Connected to GitHub' + (s3Bucket.value ? ' + S3' : '') };
-          localStorage.setItem('gh_token', ghToken.value);
-          localStorage.setItem('aws_access_key', awsAccessKey.value);
-          localStorage.setItem('aws_secret_key', awsSecretKey.value);
-          localStorage.setItem('s3_bucket', s3Bucket.value);
+          message.value = { type: 'info', text: 'Verifying token…' };
+          try {
+            const res = await fetch('https://api.github.com/user', {
+              headers: { Authorization: `token ${ghToken.value}` }
+            });
+            if (!res.ok) {
+              message.value = { type: 'error', text: `GitHub token verification failed (${res.status})` };
+              return;
+            }
+            authenticated.value = true;
+            message.value = { type: 'success', text: 'Connected to GitHub' + (s3Bucket.value ? ' + S3' : '') };
+            sessionStorage.setItem('gh_token', ghToken.value);
+            sessionStorage.setItem('aws_access_key', awsAccessKey.value);
+            sessionStorage.setItem('aws_secret_key', awsSecretKey.value);
+            sessionStorage.setItem('s3_bucket', s3Bucket.value);
+          } catch (err) {
+            message.value = { type: 'error', text: `Could not reach GitHub API: ${err.message}` };
+          }
         };
 
         const saveTos3 = async () => {
@@ -547,7 +562,9 @@
               text: `Save JSON to S3 via AWS CLI:\naws s3 cp --acl public-read /tmp/${filename} s3://${s3Bucket.value}/personas/`
             };
 
-            navigator.clipboard.writeText(json);
+            navigator.clipboard.writeText(json).catch(() => {
+              message.value = { type: 'error', text: 'Clipboard access denied. Copy the JSON from the preview manually.' };
+            });
           } catch (err) {
             message.value = { type: 'error', text: `Error: ${err.message}` };
           }
@@ -616,50 +633,54 @@
           awsAccessKey.value = '';
           awsSecretKey.value = '';
           s3Bucket.value = '';
-          localStorage.removeItem('gh_token');
-          localStorage.removeItem('aws_access_key');
-          localStorage.removeItem('aws_secret_key');
-          localStorage.removeItem('s3_bucket');
+          sessionStorage.removeItem('gh_token');
+          sessionStorage.removeItem('aws_access_key');
+          sessionStorage.removeItem('aws_secret_key');
+          sessionStorage.removeItem('s3_bucket');
           message.value = null;
         };
 
+        const removeFromArray = (arr, item) => {
+          const idx = arr.indexOf(item);
+          if (idx !== -1) arr.splice(idx, 1);
+        };
+
         const addAvoidWord = () => {
-          if (newAvoidWord.value.trim()) {
-            persona.value.voice.avoid_words.push(newAvoidWord.value.trim());
+          const w = newAvoidWord.value.trim();
+          if (w && !persona.value.voice.avoid_words.includes(w)) {
+            persona.value.voice.avoid_words.push(w);
             newAvoidWord.value = '';
           }
         };
 
-        const removeAvoidWord = (idx) => {
-          persona.value.voice.avoid_words.splice(idx, 1);
-        };
+        const removeAvoidWord = (word) => removeFromArray(persona.value.voice.avoid_words, word);
 
         const addPreferWord = () => {
-          if (newPreferWord.value.trim()) {
-            persona.value.voice.prefer_words.push(newPreferWord.value.trim());
+          const w = newPreferWord.value.trim();
+          if (w && !persona.value.voice.prefer_words.includes(w)) {
+            persona.value.voice.prefer_words.push(w);
             newPreferWord.value = '';
           }
         };
 
-        const removePreferWord = (idx) => {
-          persona.value.voice.prefer_words.splice(idx, 1);
-        };
+        const removePreferWord = (word) => removeFromArray(persona.value.voice.prefer_words, word);
 
         const addPhrase = () => {
-          if (newPhrase.value.trim()) {
-            persona.value.voice.custom_phrases.push(newPhrase.value.trim());
+          const p = newPhrase.value.trim();
+          if (p && !persona.value.voice.custom_phrases.includes(p)) {
+            persona.value.voice.custom_phrases.push(p);
             newPhrase.value = '';
           }
         };
 
-        const removePhrase = (idx) => {
-          persona.value.voice.custom_phrases.splice(idx, 1);
-        };
+        const removePhrase = (phrase) => removeFromArray(persona.value.voice.custom_phrases, phrase);
 
         const copyToClipboard = () => {
           navigator.clipboard.writeText(previewJson.value).then(() => {
             message.value = { type: 'success', text: 'JSON copied to clipboard' };
             setTimeout(() => message.value = null, 3000);
+          }).catch(() => {
+            message.value = { type: 'error', text: 'Clipboard access denied. Select and copy the JSON from the preview manually.' };
           });
         };
 
@@ -671,16 +692,30 @@
           a.href = url;
           a.download = `${persona.value.meta.name}.meml`;
           a.click();
-          URL.revokeObjectURL(url);
+          setTimeout(() => URL.revokeObjectURL(url), 100);
+        };
+
+        const escapeMemlString = (str) => {
+          return String(str)
+            .replace(/\\/g, '\\\\')
+            .replace(/"/g, '\\"')
+            .replace(/\n/g, '\\n')
+            .replace(/\r/g, '\\r')
+            .replace(/\t/g, '\\t')
+            .replace(/\f/g, '\\f')
+            .replace(/\b/g, '\\b')
+            .replace(/[\x00-\x08\x0b\x0e-\x1f\x7f]/g, (c) =>
+              `\\u${c.charCodeAt(0).toString(16).padStart(4, '0')}`
+            );
         };
 
         const toMeml = (p) => {
           let meml = `# ${p.meta.name} persona\n\n`;
           meml += `[🪪 meta]\n`;
-          meml += `name        = "${p.meta.name}"\n`;
-          meml += `description = "${p.meta.description}"\n`;
-          meml += `version     = "${p.meta.version}"\n`;
-          meml += `created_at  = "${p.meta.created_at}"\n\n`;
+          meml += `name        = "${escapeMemlString(p.meta.name)}"\n`;
+          meml += `description = "${escapeMemlString(p.meta.description)}"\n`;
+          meml += `version     = "${escapeMemlString(p.meta.version)}"\n`;
+          meml += `created_at  = "${escapeMemlString(p.meta.created_at)}"\n\n`;
 
           meml += `[🎭 tone]\n`;
           for (const [k, v] of Object.entries(p.tone)) {
@@ -689,26 +724,28 @@
 
           meml += `\n[📢 verbosity]\n`;
           for (const [k, v] of Object.entries(p.verbosity)) {
-            meml += `${k} = "${v}"\n`;
+            meml += `${k} = "${escapeMemlString(v)}"\n`;
           }
 
           meml += `\n[🗣️ voice]\n`;
-          meml += `avoid_words    = [${p.voice.avoid_words.map(w => `"${w}"`).join(', ')}]\n`;
-          meml += `prefer_words   = [${p.voice.prefer_words.map(w => `"${w}"`).join(', ')}]\n`;
-          meml += `custom_phrases = [${p.voice.custom_phrases.map(w => `"${w}"`).join(', ')}]\n`;
+          meml += `avoid_words    = [${p.voice.avoid_words.map(w => `"${escapeMemlString(w)}"`).join(', ')}]\n`;
+          meml += `prefer_words   = [${p.voice.prefer_words.map(w => `"${escapeMemlString(w)}"`).join(', ')}]\n`;
+          meml += `custom_phrases = [${p.voice.custom_phrases.map(w => `"${escapeMemlString(w)}"`).join(', ')}]\n`;
           meml += `attribution    = ${p.voice.attribution ? '✅' : '❌'}\n`;
 
           return meml;
         };
 
-        // Load from localStorage on mount
-        if (localStorage.getItem('gh_token')) {
-          ghToken.value = localStorage.getItem('gh_token');
-          awsAccessKey.value = localStorage.getItem('aws_access_key') || '';
-          awsSecretKey.value = localStorage.getItem('aws_secret_key') || '';
-          s3Bucket.value = localStorage.getItem('s3_bucket') || '';
-          authenticate();
-        }
+        // Restore session credentials and re-verify token (sessionStorage — cleared when tab is closed)
+        onMounted(async () => {
+          if (sessionStorage.getItem('gh_token')) {
+            ghToken.value = sessionStorage.getItem('gh_token');
+            awsAccessKey.value = sessionStorage.getItem('aws_access_key') || '';
+            awsSecretKey.value = sessionStorage.getItem('aws_secret_key') || '';
+            s3Bucket.value = sessionStorage.getItem('s3_bucket') || '';
+            await authenticate();
+          }
+        });
 
         return {
           authenticated,
