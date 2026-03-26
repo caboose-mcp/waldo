@@ -1,8 +1,9 @@
 {
   "meta": {
-    "name": "coding-style",
-    "description": "Auto-extracted coding conventions from scanned repo",
+    "name": "coding-style-template",
+    "description": "Template/example coding-style profile; copy or adapt this to ~/.claude/personas/code/coding-style.json to use it as a code-domain profile.",
     "version": "1.0.0",
+    "template": true,
     "created_at": "2026-03-26T00:00:00Z",
     "scanned_files": 0
   },
