@@ -111,7 +111,10 @@ echo
 
 # 5. Set active persona
 echo -e "${YELLOW}Setting active persona...${NC}"
+CONFIG_ROOT="${XDG_CONFIG_HOME:-$HOME/.config}/waldo"
+mkdir -p "$CONFIG_ROOT"
 printf '%s' "agent/default" > "$PERSONAS_DIR/.active"
+printf '%s' "agent/default" > "$CONFIG_ROOT/.active"
 echo -e "${GREEN}✓ Active persona: agent/default${NC}"
 echo
 
