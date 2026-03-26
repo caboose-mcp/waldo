@@ -1,0 +1,48 @@
+{
+  "meta": {
+    "name": "coding-style",
+    "description": "Auto-extracted coding conventions from scanned repo",
+    "version": "1.0.0",
+    "created_at": "2026-03-26T00:00:00Z",
+    "scanned_files": 0
+  },
+  "indentation": {
+    "style": "spaces",
+    "spaces": 2
+  },
+  "naming": {
+    "primary": "camelCase",
+    "classes": "PascalCase",
+    "constants": "SCREAMING_SNAKE_CASE"
+  },
+  "line_length": {
+    "average": 88,
+    "soft_limit": 80,
+    "hard_limit": 120
+  },
+  "imports": {
+    "style": "ESM",
+    "relative": true,
+    "order": "internal-then-external"
+  },
+  "comments": {
+    "style": "native",
+    "jsdoc": true,
+    "inline_frequency": "moderate"
+  },
+  "functions": {
+    "average_length": 30,
+    "prefer_small": true,
+    "arrow_functions": true
+  },
+  "error_handling": {
+    "style": "exceptions",
+    "custom_errors": true,
+    "throw_on_invalid": true
+  },
+  "types": {
+    "language": "typescript",
+    "strict": true,
+    "explicit_returns": true
+  }
+}
