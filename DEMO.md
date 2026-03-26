@@ -10,7 +10,7 @@ curl -fsSL https://raw.githubusercontent.com/caboose-mcp/waldo/demo/dual-domain/
 
 What happens:
 ```
-✓ AWS authenticated as caboose_cli (Account: 276362266002)
+✓ AWS authenticated as your-user (Account: 123456789012)
 ✓ Created: ~/.claude/personas/{agent,code}
 ✓ Default persona created
 ✓ Active persona: agent/default
