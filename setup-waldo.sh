@@ -272,6 +272,6 @@ echo "  4. Learn from conversation:"
 echo "     /waldo learn"
 echo
 echo -e "${BLUE}Next:${NC}"
-echo "  • Full docs: ${PERSONAS_DIR}/../../../dev/waldo/NOTHANKSONA-SETUP.md"
+echo "  • Full docs: ${PERSONAS_DIR}/../../../dev/waldo/WALDO-SETUP.md"
 echo "  • GitHub: https://github.com/caboose-mcp/waldo"
 echo
