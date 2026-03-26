@@ -152,7 +152,7 @@ The `inject-persona.sh` hook runs on `UserPromptSubmit`:
 PERSONA=$(cat ~/.config/waldo/.active)  # e.g., "agent/chris-marasco"
 
 # Convert .meml → JSON at read time
-PERSONA_JSON=$(meml dump ~/.config/waldo/personas/agent/$PERSONA.meml)
+PERSONA_JSON=$(meml dump ~/.config/waldo/personas/$PERSONA.meml)
 
 # Inject into Claude context (via hook)
 echo "{...persona context...}" >> prompt
