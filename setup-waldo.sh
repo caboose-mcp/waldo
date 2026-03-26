@@ -124,32 +124,34 @@ echo -e "${YELLOW}Setting up hook scripts...${NC}"
 HOOKS_DIR="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/waldo"
 mkdir -p "$HOOKS_DIR"
 
-# Try to get from local repo first, then fallback to download
+# Try to get from local repo first, then ensure all required hooks are present (download any missing)
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 REPO_HOOKS="$SCRIPT_DIR/.claude/hooks/waldo"
+REPO_URL="https://raw.githubusercontent.com/caboose-mcp/waldo/demo/dual-domain/.claude/hooks/waldo"
+
+HOOKS=(
+  "inject-persona.sh"
+  "session-counter.sh"
+  "s3-sync.sh"
+  "accumulate-deltas.sh"
+  "scan-code-style.sh"
+  "fingerprint-cache.sh"
+  "status-line.sh"
+)
 
 if [ -d "$REPO_HOOKS" ]; then
   echo "  Using local repo hooks..."
   cp "$REPO_HOOKS"/*.sh "$HOOKS_DIR/" 2>/dev/null || true
-else
-  echo "  Downloading hooks from GitHub..."
-  REPO_URL="https://raw.githubusercontent.com/caboose-mcp/waldo/demo/dual-domain/.claude/hooks/waldo"
+fi
 
-  HOOKS=(
-    "inject-persona.sh"
-    "session-counter.sh"
-    "s3-sync.sh"
-    "accumulate-deltas.sh"
-    "scan-code-style.sh"
-    "fingerprint-cache.sh"
-  )
-
-  for hook in "${HOOKS[@]}"; do
+echo "  Ensuring required hooks are installed..."
+for hook in "${HOOKS[@]}"; do
+  if [ ! -f "$HOOKS_DIR/$hook" ]; then
     if curl -fsSL "$REPO_URL/$hook" -o "$HOOKS_DIR/$hook" 2>/dev/null; then
       chmod +x "$HOOKS_DIR/$hook"
     fi
-  done
-fi
+  fi
+done
 
 # Verify at least s3-sync exists (core dependency)
 if [ -f "$HOOKS_DIR/s3-sync.sh" ]; then
