@@ -12,8 +12,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22.x'
+
       - name: Install meml
-        run: go install github.com/caboose-mcp/meml/cmd/meml@latest
+        run: go install github.com/caboose-mcp/meml/cmd/meml@v0.1.0
 
       - name: Add Go bin to PATH
         run: echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
