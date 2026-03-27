@@ -1,0 +1,45 @@
+# ask-a-dev moderation guardrails
+# Controls how the AI moderates anonymous replies.
+# Can be edited to adjust strictness over time — starts strict, can relax after clean period.
+
+[🛡️ moderation]
+enabled                  = ✅
+mode                     = "strict"    # strict | balanced | relaxed
+auto_shutdown_enabled    = ✅          # flip maintenance mode on threshold breach
+violation_threshold      = 5           # violations before maintenance mode
+
+[🔢 moderation_thresholds]
+# Scores are 0.0–1.0; higher = more strict
+spam_score               = 0.80        # 0.80 = flag if 80%+ confident it's spam
+toxicity_score           = 0.70        # abuse, slurs, threats
+pii_score                = 0.85        # email, phone, SSN, etc. (very strict)
+off_topic_score          = 0.75        # off-topic for the daily question
+rate_limit_per_ip        = 3           # max replies per IP per 24h
+
+[📏 relaxation_schedule]
+# After X clean days with no violations, automatically relax thresholds
+relaxation_enabled       = ✅
+clean_days_required      = 7
+relaxed_spam_score       = 0.70        # loosen spam threshold
+relaxed_toxicity_score   = 0.60        # loosen toxicity
+relaxed_off_topic_score  = 0.65        # loosen off-topic
+
+[🚩 fast_reject_patterns]
+# These trigger immediate rejection without LLM check (speed + cost)
+fast_reject              = ✅
+banned_url_protocols     = ["javascript:", "data:", "vbscript:", "file:"]
+banned_html_tags         = ["<script", "<iframe", "<object", "eval("]
+max_reply_length_chars   = 2000
+min_reply_length_chars   = 10
+max_consecutive_newlines = 5
+
+[📢 transparency_settings]
+show_moderation_status   = ✅          # always shown to user
+show_rejection_reason    = ✅          # generic reason (not specifics)
+show_ai_disclaimer       = ✅          # "AI-moderated. May be edited."
+show_ai_call_details     = ✅          # expose moderation reasoning to admin
+
+[🤖 llm_config]
+model                    = "claude-3-5-haiku-20241022"  # fast + cost-effective
+max_tokens               = 256
+temperature              = 0.3         # conservative for moderation decisions

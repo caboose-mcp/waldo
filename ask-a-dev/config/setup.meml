@@ -1,0 +1,70 @@
+# ask-a-dev initial setup configuration (template)
+# Copy this file, fill in your values, and commit to enable the service.
+# After first commit, n8n workflows will auto-populate the webhook URLs.
+
+[🔧 discord]
+server_id               = ""            # Your Discord server ID
+admin_dm_channel_id     = ""            # Bot's personal DM channel (auto-created by Discord)
+question_channel_id     = ""            # Channel where daily questions are posted
+reply_channel_id        = ""            # Optional: channel for reply notifications
+admin_user_id           = ""            # Your Discord user ID (for DMs)
+bot_token_credential    = "discord-bot" # Name of n8n credential (set up in n8n)
+
+[⏰ schedule]
+question_time           = "09:00"       # Daily question post time (UTC, 24-hour format)
+summary_time            = "22:00"       # End-of-day summary time
+approval_timeout_hours  = 2             # Max time to approve before fallback to random
+timezone                = "UTC"         # Can override to America/New_York, Europe/London, etc.
+
+[🌍 n8n_workflows]
+# These are populated by n8n after setup
+question_workflow_id    = ""            # n8n workflow ID (populated after import + activate)
+approval_webhook_url    = ""            # n8n webhook URL for admin selection
+reply_webhook_url       = ""            # n8n webhook URL for reply submissions
+summary_workflow_id     = ""            # n8n summary generation workflow
+
+[🤖 ai_configuration]
+# References to personas defined in personas/ directory
+bot_persona             = "bot.meml"    # Persona for question generation + summaries
+moderation_persona      = "moderation.meml"  # Moderation guardrails
+
+question_model          = "claude-3-5-haiku-20241022"
+summary_model           = "claude-opus-4-5"
+moderation_model        = "claude-3-5-haiku-20241022"
+
+max_question_tokens     = 256
+max_summary_tokens      = 1024
+max_moderation_tokens   = 256
+
+[🔢 question_selection]
+# How many questions from each source (should total 5)
+auto_random_count       = 2             # random from question pool
+ml_relevance_count      = 2             # from tech news + Claude
+mod_suggestion_count    = 1             # from learning history / feedback
+approval_timeout_hours  = 2             # fallback to random if no approval
+
+[📱 external_apis]
+# These are referenced by n8n workflows
+rss_to_json_url         = "https://api.rss2json.com/v1/api.json"  # Free RSS → JSON converter
+news_api_key_credential = "newsapi-key" # n8n credential name (if using NewsAPI)
+
+[🔐 github]
+repo                    = "caboose-mcp/waldo"
+default_branch          = "main"
+question_dir            = "ui/ask-a-dev/data/questions"
+data_file_today         = "ui/ask-a-dev/data/today.json"
+feature_flags_file      = "ui/ask-a-dev/data/feature-flags.json"
+github_pat_credential   = "github-pat"  # n8n credential name
+
+[🗺️ auth]
+# Google OAuth for admin panel
+google_client_id        = ""            # Public client ID (safe in HTML)
+google_client_secret_credential = "google-oauth"  # n8n credential name
+admin_emails            = []            # List of emails allowed admin access
+
+[🎛️ feature_flags]
+# Initial state for feature-flags.json
+maintenance_mode        = ❌
+moderation_enabled      = ✅
+auto_maintenance        = ✅            # auto-flip maintenance on violation threshold
+violation_threshold     = 5
