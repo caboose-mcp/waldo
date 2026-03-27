@@ -1,0 +1,35 @@
+# Left hook configuration — pre-commit checks
+# Install: curl https://raw.githubusercontent.com/evilmartians/left/master/install | bash
+# Run: left run pre-commit
+
+version = "1"
+
+[[pre-commit]]
+name = "meml"
+run = "meml validate {staged_files}"
+glob = "*.meml"
+skip_return = [0]
+
+[[pre-commit]]
+name = "shellcheck"
+run = "shellcheck {staged_files}"
+glob = "*.sh"
+exclude = "node_modules"
+skip_return = [0]
+
+[[pre-commit]]
+name = "no-nothanksona"
+run = """
+if grep -r "nothanksona" {staged_files} 2>/dev/null; then
+  echo "❌ nothanksona references found"
+  exit 1
+fi
+"""
+glob = "*.md|*.sh|*.json|*.meml"
+
+# Optional: markdown lint
+[[pre-commit]]
+name = "markdown"
+run = "markdownlint {staged_files}"
+glob = "*.md"
+skip_return = [1]  # Warn but don't fail

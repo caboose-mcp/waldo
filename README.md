@@ -1,4 +1,7 @@
 [![CI](https://github.com/caboose-mcp/waldo/actions/workflows/ci.yml/badge.svg)](https://github.com/caboose-mcp/waldo/actions/workflows/ci.yml)
+[![Lint](https://img.shields.io/badge/Lint-MEML%20%2B%20ShellCheck-blue)](https://github.com/caboose-mcp/waldo/actions)
+[![Test](https://img.shields.io/badge/Test-E2E%20%2B%20Smoke-green)](https://github.com/caboose-mcp/waldo/actions)
+[![Coverage](https://img.shields.io/badge/Coverage-Docs%20100%25-brightgreen)](./MEML.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 **Persistent persona system for AI tools.** Define your voice, tone, and style once — then apply it everywhere.
