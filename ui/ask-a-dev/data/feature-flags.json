@@ -1,0 +1,13 @@
+{
+  "maintenance_mode": false,
+  "service_status": "up",
+  "moderation_enabled": true,
+  "replies_enabled": true,
+  "show_moderation_status": true,
+  "show_ai_reasoning": true,
+  "incident_count": 0,
+  "clean_days": 0,
+  "google_client_id": "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com",
+  "reply_webhook_url": "https://your-n8n-instance.n8n.cloud/webhook/ask-a-dev-replies",
+  "admin_emails": ["your-email@example.com"]
+}

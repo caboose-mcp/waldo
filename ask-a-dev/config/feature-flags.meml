@@ -1,0 +1,39 @@
+# ask-a-dev feature flags
+# Auto-updated by n8n workflows based on incidents and maintenance needs.
+# Can be manually edited to control service behavior.
+
+[🚦 service_status]
+maintenance_mode        = ❌            # ✅ = show maintenance page, ❌ = normal
+service_status          = "up"          # up | degraded | down
+moderation_enabled      = ✅
+replies_enabled         = ✅
+summaries_enabled       = ✅
+
+[📊 incident_tracking]
+incident_count          = 0             # total moderation violations to date
+last_incident           = ~             # timestamp of last violation
+last_maintenance_flip   = ~             # when maintenance mode was last toggled
+clean_days              = 0             # consecutive days with no violations
+
+[🎛️ moderation_mode]
+# Auto-adjusted based on incident count
+current_strictness      = 0.8           # 0.0–1.0 (high = strict)
+auto_relax_enabled      = ✅            # relax thresholds after clean_days_required
+days_until_relaxation   = 7
+
+[🔍 feature_toggles]
+show_moderation_status  = ✅            # display mod badge to users
+show_rejection_reason   = ✅            # show why reply was rejected
+show_ai_reasoning       = ✅            # expand AI call details in UI
+show_reply_count        = ✅            # display total reply count
+show_citations          = ✅            # show news source citations
+
+[📱 integrations]
+discord_online          = ✅            # bot is connected
+github_api_ok           = ✅            # latest commit succeeded
+n8n_workflows_healthy   = ✅            # workflows are running
+
+[schedule_override]
+# Can be set to pause/resume normal schedule
+pause_questions         = ❌            # ❌ = run normally, ✅ = pause daily Q generation
+next_question_time      = ~             # override next question time (if paused)

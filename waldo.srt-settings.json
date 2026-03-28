@@ -1,0 +1,106 @@
+{
+  "name": "waldo-hardened",
+  "description": "Secure sandboxed environment for waldo setup and operations",
+  "version": "1.0.0",
+  "sandbox": {
+    "mode": "strict",
+    "isolation": "process",
+    "timeout": 3600,
+    "maxMemory": "512MB"
+  },
+  "network": {
+    "mode": "allowlist",
+    "allowedDomains": [
+      "raw.githubusercontent.com",
+      "github.com",
+      "api.github.com",
+      "sts.amazonaws.com",
+      "s3.amazonaws.com",
+      "*.amazonaws.com",
+      "*.s3.amazonaws.com"
+    ],
+    "deniedDomains": [
+      "localhost",
+      "127.0.0.1"
+    ],
+    "allowUnsafeProtocols": false,
+    "disableDNS": false
+  },
+  "filesystem": {
+    "mode": "denylist",
+    "denyRead": [
+      "~/.ssh",
+      "~/.gpg",
+      "~/.aws/credentials",
+      "/etc/passwd",
+      "/etc/shadow"
+    ],
+    "allowWrite": [
+      "/tmp",
+      "~/.claude",
+      "~/.config/waldo",
+      "~/.claude/personas",
+      "~/.config/waldo/personas"
+    ],
+    "denyWrite": [
+      "~/.ssh",
+      "~/.gpg",
+      "/etc",
+      "/root",
+      "/sys",
+      "/proc"
+    ],
+    "allowExecute": [
+      "/bin/bash",
+      "/bin/sh",
+      "/usr/bin/aws",
+      "/usr/bin/jq",
+      "/usr/bin/git",
+      "/usr/local/bin/aws",
+      "/opt/homebrew/bin/aws"
+    ],
+    "denyExecute": [
+      "/bin/rm",
+      "/bin/rmdir",
+      "/usr/bin/sudo",
+      "/usr/bin/su"
+    ]
+  },
+  "environment": {
+    "mode": "denylist",
+    "allowed": [
+      "HOME",
+      "USER",
+      "PATH",
+      "SHELL",
+      "LANG",
+      "LC_ALL",
+      "AWS_PROFILE",
+      "AWS_REGION",
+      "AWS_ACCESS_KEY_ID",
+      "AWS_SECRET_ACCESS_KEY",
+      "AWS_SESSION_TOKEN",
+      "GITHUB_TOKEN",
+      "GH_TOKEN"
+    ],
+    "denied": [
+      "SSH_AUTH_SOCK",
+      "SSH_PRIVATE_KEY",
+      "GPG_PASSPHRASE"
+    ]
+  },
+  "capabilities": {
+    "allowNetworkAccess": true,
+    "allowProcessCreation": true,
+    "allowFileAccess": true,
+    "allowSignals": false,
+    "allowPTY": true
+  },
+  "audit": {
+    "enabled": true,
+    "logFile": "~/.waldo/audit.log",
+    "logLevel": "info",
+    "logNetwork": true,
+    "logFilesystem": true
+  }
+}

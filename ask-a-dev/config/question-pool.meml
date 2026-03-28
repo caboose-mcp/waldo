@@ -1,0 +1,94 @@
+# ask-a-dev question pool
+# Seed questions for auto-random selection by the daily workflow.
+# n8n picks 2 random questions from this pool each day.
+# Add more questions to this pool over time.
+
+[❓ q0001]
+text       = "How do you handle database migrations in production without downtime?"
+topic      = "databases"
+difficulty = "intermediate"
+tags       = ["postgresql", "mysql", "devops"]
+
+[❓ q0002]
+text       = "What's your approach to testing async code and avoiding flaky tests?"
+topic      = "testing"
+difficulty = "intermediate"
+tags       = ["testing", "concurrency", "reliability"]
+
+[❓ q0003]
+text       = "How do you decide when to use microservices vs a monolith?"
+topic      = "architecture"
+difficulty = "senior"
+tags       = ["architecture", "scaling", "organization"]
+
+[❓ q0004]
+text       = "What's the most underrated developer tool in your stack right now?"
+topic      = "tooling"
+difficulty = "any"
+tags       = ["tools", "workflow"]
+
+[❓ q0005]
+text       = "How do you approach code reviews to make them useful without being painful?"
+topic      = "team"
+difficulty = "any"
+tags       = ["collaboration", "code-quality"]
+
+[❓ q0006]
+text       = "What's your strategy for managing technical debt without killing velocity?"
+topic      = "engineering"
+difficulty = "senior"
+tags       = ["technical-debt", "team-dynamics"]
+
+[❓ q0007]
+text       = "How do you structure logging so on-call engineers can actually debug at 3am?"
+topic      = "observability"
+difficulty = "intermediate"
+tags       = ["logging", "ops", "observability"]
+
+[❓ q0008]
+text       = "What mistake have you made deploying to production that you'd warn others about?"
+topic      = "operations"
+difficulty = "any"
+tags       = ["deployments", "incidents", "postmortems"]
+
+[❓ q0009]
+text       = "How do you think about API versioning when you have external consumers?"
+topic      = "api-design"
+difficulty = "intermediate"
+tags       = ["api", "compatibility", "design"]
+
+[❓ q0010]
+text       = "What's your current thinking on AI-assisted coding — helpful tool or productivity trap?"
+topic      = "ai-tooling"
+difficulty = "any"
+tags       = ["ai", "tooling", "workflow"]
+
+[❓ q0011]
+text       = "How do you communicate technical constraints to non-technical stakeholders?"
+topic      = "communication"
+difficulty = "any"
+tags       = ["communication", "leadership"]
+
+[❓ q0012]
+text       = "What's your approach to caching, and when do you reach for Redis vs something simpler?"
+topic      = "performance"
+difficulty = "intermediate"
+tags       = ["caching", "performance", "redis"]
+
+[❓ q0013]
+text       = "How do you handle secrets management across dev, staging, and prod environments?"
+topic      = "security"
+difficulty = "intermediate"
+tags       = ["security", "devops", "secrets"]
+
+[❓ q0014]
+text       = "When do you choose to build vs buy for a new feature?"
+topic      = "engineering"
+difficulty = "any"
+tags       = ["decision-making", "strategy"]
+
+[❓ q0015]
+text       = "How do you structure your local dev environment so onboarding takes under an hour?"
+topic      = "developer-experience"
+difficulty = "any"
+tags       = ["developer-experience", "onboarding"]

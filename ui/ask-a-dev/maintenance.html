@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ask a dev — Maintenance</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --surface: #111;
+      --border: #222;
+      --text: #f0f0f0;
+      --text-muted: #666;
+      --accent: #3b82f6;
+      --warn: #f97316;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 16px;
+    }
+
+    .maintenance-box {
+      background: var(--surface);
+      border: 2px solid var(--warn);
+      padding: 40px;
+      max-width: 400px;
+      text-align: center;
+      border-radius: 2px;
+    }
+
+    .hat {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 24px;
+    }
+
+    h1 {
+      font-size: 20px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: -0.5px;
+      margin-bottom: 12px;
+    }
+
+    p {
+      color: var(--text-muted);
+      line-height: 1.6;
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+
+    p:last-child {
+      margin-bottom: 0;
+    }
+
+    .status {
+      background: var(--bg);
+      border: 1px solid var(--warn);
+      padding: 12px;
+      border-radius: 2px;
+      margin-top: 24px;
+      font-family: ui-monospace, monospace;
+      font-size: 12px;
+      color: var(--warn);
+    }
+
+    code {
+      color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+  <div class="maintenance-box">
+    <svg class="hat" viewBox="0 0 60 90" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="30" cy="8" r="8" fill="#3b82f6"/>
+      <rect x="18" y="16" width="24" height="8" fill="#3b82f6"/>
+      <rect x="18" y="24" width="24" height="8" fill="#ffffff" opacity="0.9"/>
+      <rect x="18" y="32" width="24" height="8" fill="#3b82f6"/>
+      <rect x="18" y="40" width="24" height="8" fill="#ffffff" opacity="0.9"/>
+      <rect x="18" y="48" width="24" height="8" fill="#3b82f6"/>
+      <rect x="18" y="56" width="24" height="8" fill="#ffffff" opacity="0.9"/>
+      <rect x="16" y="64" width="28" height="10" fill="#1d4ed8"/>
+      <rect x="10" y="73" width="40" height="5" rx="1" fill="#1e3a8a"/>
+    </svg>
+
+    <h1>Down for Maintenance</h1>
+
+    <p>The ask-a-dev service is temporarily offline.</p>
+
+    <p>This usually means:</p>
+    <ul style="text-align: left; display: inline-block; margin-bottom: 12px; line-height: 1.8;">
+      <li>Moderation threshold was exceeded</li>
+      <li>Service health checks failed</li>
+      <li>Scheduled maintenance</li>
+    </ul>
+
+    <p style="margin-top: 12px;">Check back in a few minutes. If this persists, please <a href="https://github.com/caboose-mcp/waldo/issues" style="color: var(--accent); text-decoration: underline;">file an issue</a>.</p>
+
+    <div class="status">
+      STATUS: <code>OFFLINE</code><br>
+      REASON: <code>maintenance_mode</code><br>
+      Refresh page to retry
+    </div>
+  </div>
+</body>
+</html>

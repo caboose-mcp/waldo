@@ -18,6 +18,8 @@ Works with **Claude Code**, **Cursor**, **ChatGPT**, **Gemini**, and **Codeium**
 
 ## Quick Start
 
+**Try it first:** Visit the [interactive playground](https://caboose-mcp.github.io/waldo/ui/playground.html) — adjust tone sliders, see ChatGPT/Gemini prompts update in real-time, no installation needed.
+
 ```bash
 # Install
 curl -fsSL https://raw.githubusercontent.com/caboose-mcp/waldo/main/setup-waldo.sh | bash
@@ -121,6 +123,7 @@ All tools use the same `~/.config/waldo/` config directory.
 
 ### Installation
 
+**Standard:**
 ```bash
 # One command (handles everything)
 bash setup-waldo.sh
@@ -130,6 +133,31 @@ mkdir -p ~/.config/waldo/personas/{agent,code}
 curl -fsSL https://raw.githubusercontent.com/caboose-mcp/waldo/main/example.meml > ~/.config/waldo/personas/agent/default.meml
 echo "agent/default" > ~/.config/waldo/.active
 ```
+
+**Hardened (Sandbox Runtime — macOS/Linux):**
+
+Install with network, filesystem, and capability restrictions using [Anthropic Sandbox Runtime](https://github.com/anthropics/sandbox-runtime):
+
+```bash
+# Install srt
+npm install -g @anthropic-ai/sandbox-runtime
+
+# Download setup script and sandbox config
+curl -fsSL https://raw.githubusercontent.com/caboose-mcp/waldo/main/setup-waldo.sh -o /tmp/setup-waldo.sh
+curl -fsSL https://raw.githubusercontent.com/caboose-mcp/waldo/main/waldo.srt-settings.json -o /tmp/waldo.srt-settings.json
+
+# Run inside sandbox
+srt --settings /tmp/waldo.srt-settings.json bash /tmp/setup-waldo.sh
+
+# Or install from local copy
+srt --settings ./waldo.srt-settings.json bash ./setup-waldo.sh
+```
+
+The sandbox config (`waldo.srt-settings.json`) enforces:
+- **Network**: GitHub, AWS S3 APIs only (no localhost)
+- **Filesystem**: Read-only on secrets (~/.ssh, ~/.gpg); write allowed to ~/.claude and ~/.config/waldo
+- **Execution**: Only bash, aws, jq, git allowed; no sudo/rm
+- **Audit**: All operations logged to ~/.waldo/audit.log
 
 ### S3 Sync (Optional)
 

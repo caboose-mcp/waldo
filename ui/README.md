@@ -1,13 +1,40 @@
-# waldo Config UI
+# waldo Web UI
 
-Lightweight web UI for editing waldo personas. Single HTML file, no build step.
+Two interactive tools for working with personas:
 
-## Usage
+1. **Playground** — Interactive sandbox to experiment with tone
+2. **Config UI** — Visual editor for detailed persona customization
+
+## Playground (Quick Start)
+
+**Try without installation:** https://caboose-mcp.github.io/waldo/ui/playground.html
+
+Interactive MEML editor with real-time tone slider controls:
+- Adjust formality, directness, humor, hedging, warmth
+- See JSON, ChatGPT prompt, and Gemini prompt update live
+- Copy prompts to clipboard or download MEML file
+- Pre-loaded examples: default, direct, formal, warm, technical
+- Works entirely in browser (no backend needed)
 
 ### Local
 
 ```bash
-# 1. Open in browser
+# Open playground
+open ui/playground.html
+# or
+firefox ui/playground.html
+```
+
+---
+
+## Config UI (Advanced)
+
+Full visual editor for tone, verbosity, voice customization.
+
+### Local
+
+```bash
+# Open in browser
 open ui/index.html
 # or
 firefox ui/index.html
@@ -81,12 +108,34 @@ If you use a GitHub token with this UI, it is stored in your browser's **session
 - Avoid using a high-privilege classic PAT (especially on shared or untrusted machines).
 - To clear a stored token immediately, use the **Disconnect** button in the GitHub Sync section of the UI, or close the browser tab.
 
+## Playground Features
+
+| Feature | Status |
+|---------|--------|
+| Edit MEML in real-time | ✅ |
+| Tone sliders (5 dimensions) | ✅ |
+| Live JSON preview | ✅ |
+| ChatGPT prompt generator | ✅ |
+| Gemini prompt generator | ✅ |
+| Copy to clipboard | ✅ |
+| Download MEML file | ✅ |
+| Pre-loaded examples | ✅ |
+| Responsive design | ✅ |
+| Zero installation | ✅ |
+
 ## Future
 
+**Config UI:**
 - GitHub API integration: save personas directly to repo
 - Load personas from `.meml` files
 - Slack import UI
 - Mood overlay builder
+
+**Playground:**
+- WASM meml parser (faster validation)
+- Load from S3 buckets
+- Save personas to personal account (v1.1)
+- Docker version with full API (optional)
 
 ---
 

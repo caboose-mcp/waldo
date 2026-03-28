@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ask a dev — Daily Developer Q&A</title>
+  <script src="https://accounts.google.com/gsi/client"></script>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --surface: #111;
+      --surface-alt: #141414;
+      --border: #222;
+      --border-strong: #333;
+      --text: #f0f0f0;
+      --text-muted: #666;
+      --text-dim: #444;
+      --accent: #3b82f6;
+      --accent-dark: #1d4ed8;
+      --accent-light: #60a5fa;
+      --danger: #ef4444;
+      --warn: #f97316;
+      --success: #22c55e;
+      --font: system-ui, -apple-system, "Segoe UI", sans-serif;
+      --mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, monospace;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      line-height: 1.6;
+      font-size: 15px;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+
+    /* Header */
+    header {
+      background: var(--surface);
+      border-bottom: 2px solid var(--border-strong);
+      padding: 24px 0;
+      margin-bottom: 32px;
+    }
+
+    .header-content {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .waldo-hat {
+      width: 48px;
+      height: 48px;
+      flex-shrink: 0;
+    }
+
+    h1 {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      text-transform: uppercase;
+    }
+
+    .header-meta {
+      display: flex;
+      gap: 16px;
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .mod-status {
+      padding: 4px 8px;
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      font-weight: 600;
+    }
+
+    .mod-status.active {
+      color: var(--success);
+      border-color: var(--success);
+    }
+
+    .mod-status.degraded {
+      color: var(--warn);
+      border-color: var(--warn);
+    }
+
+    .mod-status.down {
+      color: var(--danger);
+      border-color: var(--danger);
+    }
+
+    /* Main content */
+    main {
+      margin-bottom: 64px;
+    }
+
+    section {
+      margin-bottom: 40px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+    }
+
+    .section-toggle {
+      font-size: 12px;
+      color: var(--text-muted);
+      transition: transform 0.2s;
+    }
+
+    .section-toggle.collapsed {
+      transform: rotate(-90deg);
+    }
+
+    /* Question Hero */
+    .question-meta {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 16px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .question-badge {
+      display: inline-block;
+      padding: 3px 8px;
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: 2px;
+      font-family: var(--mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .question-text {
+      font-size: 18px;
+      font-weight: 600;
+      line-height: 1.5;
+      margin-bottom: 16px;
+      color: var(--text);
+    }
+
+    .question-citation {
+      color: var(--accent-light);
+      text-decoration: none;
+      border-bottom: 1px solid var(--accent-light);
+      font-size: 12px;
+    }
+
+    .question-citation:hover {
+      color: var(--accent);
+    }
+
+    /* Summary section */
+    .summary-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      padding: 20px;
+      border-radius: 2px;
+    }
+
+    .summary-body {
+      transition: max-height 0.3s, opacity 0.3s;
+      max-height: 1000px;
+      opacity: 1;
+    }
+
+    .summary-body.collapsed {
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+    }
+
+    .disclaimer {
+      background: rgba(249, 115, 22, 0.1);
+      border: 1px solid var(--warn);
+      padding: 12px;
+      margin-bottom: 16px;
+      border-radius: 2px;
+      font-size: 12px;
+      color: var(--warn);
+    }
+
+    .summary-text {
+      margin-bottom: 16px;
+      line-height: 1.7;
+    }
+
+    .summary-text p {
+      margin-bottom: 12px;
+    }
+
+    .summary-text ul {
+      list-style: none;
+      padding-left: 16px;
+    }
+
+    .summary-text li {
+      margin-bottom: 8px;
+      position: relative;
+    }
+
+    .summary-text li::before {
+      content: "—";
+      position: absolute;
+      left: -16px;
+      color: var(--text-muted);
+    }
+
+    /* AI reasoning disclosure */
+    details {
+      background: var(--surface-alt);
+      padding: 12px;
+      border-radius: 2px;
+      cursor: pointer;
+      margin-top: 16px;
+    }
+
+    details summary {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      user-select: none;
+    }
+
+    .ai-call {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 12px;
+      margin-top: 12px;
+      border-radius: 2px;
+      font-size: 12px;
+    }
+
+    .ai-call-header {
+      font-weight: 600;
+      color: var(--accent-light);
+      margin-bottom: 4px;
+    }
+
+    .ai-call-detail {
+      color: var(--text-muted);
+      font-family: var(--mono);
+      font-size: 11px;
+      margin-bottom: 8px;
+    }
+
+    .ai-call details {
+      background: var(--bg);
+      margin: 8px 0;
+    }
+
+    .ai-call pre {
+      background: var(--bg);
+      padding: 8px;
+      border-radius: 2px;
+      overflow-x: auto;
+      font-size: 11px;
+      line-height: 1.4;
+      color: var(--text-dim);
+      margin-top: 4px;
+    }
+
+    /* Replies section */
+    .replies-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 20px;
+      border-radius: 2px;
+    }
+
+    .replies-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .reply {
+      display: flex;
+      gap: 12px;
+      padding: 12px;
+      background: var(--bg);
+      border-left: 2px solid var(--accent);
+      border-radius: 2px;
+    }
+
+    .reply-num {
+      flex-shrink: 0;
+      color: var(--text-muted);
+      font-family: var(--mono);
+      font-weight: 600;
+      font-size: 12px;
+      width: 24px;
+      text-align: right;
+    }
+
+    .reply-text {
+      flex: 1;
+      line-height: 1.6;
+      color: var(--text);
+    }
+
+    .reply-text p {
+      margin-bottom: 8px;
+    }
+
+    .reply-text p:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Reply form */
+    .submit-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 20px;
+      border-radius: 2px;
+    }
+
+    .form-notice {
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid var(--success);
+      padding: 12px;
+      margin-bottom: 16px;
+      border-radius: 2px;
+      font-size: 12px;
+      color: var(--success);
+    }
+
+    #reply-form {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    textarea {
+      background: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      padding: 12px;
+      font-family: var(--mono);
+      font-size: 13px;
+      min-height: 120px;
+      resize: vertical;
+      line-height: 1.5;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 2px rgba(59, 130, 246, 0.1);
+    }
+
+    button {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 12px 16px;
+      border-radius: 2px;
+      font-weight: 600;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      transition: background 0.2s;
+      font-family: var(--font);
+    }
+
+    button:hover:not(:disabled) {
+      background: var(--accent-dark);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Footer */
+    footer {
+      background: var(--surface);
+      border-top: 2px solid var(--border-strong);
+      padding: 40px 0 20px;
+      margin-top: 80px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+
+    .caboose-train {
+      width: 100%;
+      max-width: 240px;
+      height: 80px;
+      margin: 0 auto 16px;
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .container {
+        padding: 0 12px;
+      }
+
+      h1 {
+        font-size: 20px;
+      }
+
+      .question-text {
+        font-size: 16px;
+      }
+
+      .header-meta {
+        font-size: 11px;
+        gap: 8px;
+      }
+
+      .section-header {
+        padding-bottom: 8px;
+        margin-bottom: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <div class="header-content">
+        <svg class="waldo-hat" viewBox="0 0 60 90" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="30" cy="8" r="8" fill="#3b82f6"/>
+          <rect x="18" y="16" width="24" height="8" fill="#3b82f6"/>
+          <rect x="18" y="24" width="24" height="8" fill="#ffffff" opacity="0.9"/>
+          <rect x="18" y="32" width="24" height="8" fill="#3b82f6"/>
+          <rect x="18" y="40" width="24" height="8" fill="#ffffff" opacity="0.9"/>
+          <rect x="18" y="48" width="24" height="8" fill="#3b82f6"/>
+          <rect x="18" y="56" width="24" height="8" fill="#ffffff" opacity="0.9"/>
+          <rect x="16" y="64" width="28" height="10" fill="#1d4ed8"/>
+          <rect x="10" y="73" width="40" height="5" rx="1" fill="#1e3a8a"/>
+        </svg>
+        <h1>ask a dev</h1>
+      </div>
+      <div class="header-meta">
+        <span id="today-date">Mar 27, 2026</span>
+        <span class="mod-status active" id="mod-status">ACTIVE</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Question section -->
+    <section id="question-section" style="display: none;">
+      <div class="section-header">
+        <span class="section-label">Today's Question</span>
+      </div>
+      <div class="question-meta">
+        <span class="question-badge" id="question-source">ML-RELEVANT</span>
+        <a href="#" class="question-citation" id="question-citation" target="_blank">via <span id="citation-source"></span></a>
+      </div>
+      <h2 class="question-text" id="question-text"></h2>
+    </section>
+
+    <!-- Summary section -->
+    <section id="summary-section" style="display: none;">
+      <div class="section-header" onclick="toggleSummary()">
+        <span class="section-label">AI Summary</span>
+        <span class="section-toggle" id="summary-toggle">▼</span>
+      </div>
+      <div class="summary-body collapsed" id="summary-body">
+        <div class="disclaimer">⚠ <strong>AI-COMPILED</strong> — NOT FACTS. Based on <span id="reply-count">0</span> anonymous replies.</div>
+        <div class="summary-text" id="summary-text"></div>
+        <details>
+          <summary>AI Reasoning & API Calls</summary>
+          <div id="ai-reasoning-details"></div>
+        </details>
+      </div>
+    </section>
+
+    <!-- Replies section -->
+    <section id="replies-section" style="display: none;">
+      <div class="section-header">
+        <span class="section-label">Replies (<span id="replies-count">0</span>)</span>
+      </div>
+      <div class="replies-list" id="replies-list"></div>
+    </section>
+
+    <!-- Reply form section -->
+    <section id="submit-section">
+      <div class="section-header">
+        <span class="section-label">Add Your Reply</span>
+      </div>
+      <div class="form-notice">
+        ✓ <strong>Moderated by AI</strong> — Spam, toxicity, and PII are filtered. No data collected. Fully anonymous.
+      </div>
+      <form id="reply-form" onsubmit="submitReply(event)">
+        <input type="text" name="url" style="display: none;" tabindex="-1" autocomplete="off">
+        <textarea id="reply-input" name="reply" placeholder="Share your approach, experience, or perspective..." required></textarea>
+        <button type="submit" id="submit-btn">Submit Reply</button>
+      </form>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <svg class="caboose-train" viewBox="0 0 240 80" xmlns="http://www.w3.org/2000/svg">
+        <line x1="0" y1="72" x2="240" y2="72" stroke="#333" stroke-width="2"/>
+        <rect x="0" y="73" width="240" height="4" fill="#222"/>
+        <rect x="15" y="72" width="4" height="8" fill="#333"/>
+        <rect x="35" y="72" width="4" height="8" fill="#333"/>
+        <rect x="55" y="72" width="4" height="8" fill="#333"/>
+        <rect x="75" y="72" width="4" height="8" fill="#333"/>
+        <rect x="95" y="72" width="4" height="8" fill="#333"/>
+        <rect x="115" y="72" width="4" height="8" fill="#333"/>
+        <rect x="135" y="72" width="4" height="8" fill="#333"/>
+        <rect x="155" y="72" width="4" height="8" fill="#333"/>
+        <rect x="175" y="72" width="4" height="8" fill="#333"/>
+        <rect x="195" y="72" width="4" height="8" fill="#333"/>
+        <rect x="215" y="72" width="4" height="8" fill="#333"/>
+        <rect x="20" y="24" width="200" height="44" rx="3" fill="#2563eb"/>
+        <rect x="20" y="34" width="200" height="8" fill="white" opacity="0.85"/>
+        <rect x="20" y="50" width="200" height="8" fill="white" opacity="0.85"/>
+        <text x="70" y="48" font-family="monospace" font-size="14" font-weight="700" fill="#dbeafe">caboose</text>
+        <rect x="30" y="27" width="24" height="16" rx="2" fill="#93c5fd" opacity="0.6"/>
+        <rect x="66" y="27" width="24" height="16" rx="2" fill="#93c5fd" opacity="0.6"/>
+        <rect x="102" y="27" width="24" height="16" rx="2" fill="#93c5fd" opacity="0.6"/>
+        <rect x="138" y="27" width="24" height="16" rx="2" fill="#93c5fd" opacity="0.6"/>
+        <rect x="174" y="27" width="24" height="16" rx="2" fill="#93c5fd" opacity="0.6"/>
+        <circle cx="60" cy="72" r="12" fill="#1e3a8a"/>
+        <circle cx="60" cy="72" r="5" fill="#3b82f6"/>
+        <circle cx="60" cy="72" r="2" fill="#93c5fd"/>
+        <circle cx="160" cy="72" r="12" fill="#1e3a8a"/>
+        <circle cx="160" cy="72" r="5" fill="#3b82f6"/>
+        <circle cx="160" cy="72" r="2" fill="#93c5fd"/>
+        <rect x="152" y="12" width="10" height="14" rx="2" fill="#1e3a8a"/>
+        <circle cx="100" cy="16" r="3" fill="white" opacity="0.6"/>
+        <circle cx="100" cy="16" r="2" fill="white"/>
+        <circle cx="100" cy="19" r="1.5" fill="white" opacity="0.4"/>
+        <circle cx="105" cy="14" r="2" fill="white" opacity="0.5"/>
+      </svg>
+      <p>A transparent, AI-moderated daily Q&A for developers.</p>
+      <p style="margin-top: 8px; color: var(--text-dim); font-size: 11px;">Each question surfaces patterns without editorializing. All answers are anonymous.</p>
+    </div>
+  </footer>
+
+  <script>
+    // Check maintenance mode first
+    async function checkMaintenance() {
+      try {
+        const resp = await fetch('/waldo/ui/ask-a-dev/data/feature-flags.json');
+        const flags = await resp.json();
+        if (flags.maintenance_mode) {
+          window.location.href = '/waldo/ui/ask-a-dev/maintenance.html';
+        }
+        return flags;
+      } catch (e) {
+        console.error('Failed to load feature flags:', e);
+        return {};
+      }
+    }
+
+    // Load today's question and replies
+    async function loadToday() {
+      try {
+        const resp = await fetch('/waldo/ui/ask-a-dev/data/today.json');
+        const data = await resp.json();
+
+        // Update date
+        const date = new Date(data.date);
+        document.getElementById('today-date').textContent = date.toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric'
+        });
+
+        // Populate question
+        if (data.question) {
+          document.getElementById('question-text').textContent = data.question.text;
+          document.getElementById('question-source').textContent = data.question.source.toUpperCase();
+          if (data.question.citation) {
+            document.getElementById('question-citation').href = data.question.citation.url;
+            document.getElementById('citation-source').textContent = data.question.citation.source;
+          }
+          document.getElementById('question-section').style.display = 'block';
+        }
+
+        // Populate replies
+        if (data.replies && data.replies.length > 0) {
+          const list = document.getElementById('replies-list');
+          list.innerHTML = '';
+          data.replies.forEach((reply, idx) => {
+            const el = document.createElement('div');
+            el.className = 'reply';
+            el.innerHTML = `
+              <span class="reply-num">#${String(idx + 1).padStart(2, '0')}</span>
+              <div class="reply-text"><p>${escapeHtml(reply.text)}</p></div>
+            `;
+            list.appendChild(el);
+          });
+          document.getElementById('replies-count').textContent = data.replies.length;
+          document.getElementById('reply-count').textContent = data.replies.length;
+          document.getElementById('replies-section').style.display = 'block';
+        }
+
+        // Populate summary
+        if (data.summary) {
+          document.getElementById('summary-text').innerHTML = markdownToHtml(data.summary.text || '');
+          if (data.ai_calls && data.ai_calls.length > 0) {
+            const details = document.getElementById('ai-reasoning-details');
+            details.innerHTML = data.ai_calls.map(call => `
+              <div class="ai-call">
+                <div class="ai-call-header">${call.step}</div>
+                <div class="ai-call-detail">Model: ${call.model} · ${call.tokens_in} in / ${call.tokens_out} out</div>
+                <details>
+                  <summary>Prompt</summary>
+                  <pre>${escapeHtml(call.prompt_preview || '')}</pre>
+                </details>
+                <details>
+                  <summary>Output</summary>
+                  <pre>${escapeHtml(call.output_preview || '')}</pre>
+                </details>
+              </div>
+            `).join('');
+          }
+          document.getElementById('summary-section').style.display = 'block';
+        }
+
+        // Update moderation status
+        if (data.moderation) {
+          const status = document.getElementById('mod-status');
+          if (data.moderation.total_attempts > 0 && data.moderation.rejected > 0) {
+            status.textContent = 'MODERATED';
+            status.className = 'mod-status degraded';
+          }
+        }
+      } catch (e) {
+        console.error('Failed to load today:', e);
+      }
+    }
+
+    function toggleSummary() {
+      const body = document.getElementById('summary-body');
+      const toggle = document.getElementById('summary-toggle');
+      body.classList.toggle('collapsed');
+      toggle.classList.toggle('collapsed');
+    }
+
+    async function submitReply(e) {
+      e.preventDefault();
+
+      const reply = document.getElementById('reply-input').value.trim();
+      if (!reply) return;
+
+      const honeypot = e.target.url.value;
+      if (honeypot) {
+        console.warn('Honeypot detected');
+        return;
+      }
+
+      const btn = document.getElementById('submit-btn');
+      btn.disabled = true;
+      btn.textContent = 'Submitting...';
+
+      try {
+        const flags = await checkMaintenance();
+        const webhookUrl = flags.reply_webhook_url;
+
+        if (!webhookUrl) {
+          throw new Error('Webhook URL not configured');
+        }
+
+        const resp = await fetch(webhookUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            reply,
+            timestamp: new Date().toISOString(),
+            user_agent: navigator.userAgent.substring(0, 100)
+          })
+        });
+
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+
+        document.getElementById('reply-input').value = '';
+        btn.textContent = '✓ Reply Submitted';
+        setTimeout(() => {
+          btn.disabled = false;
+          btn.textContent = 'Submit Reply';
+        }, 3000);
+      } catch (e) {
+        console.error('Reply submission failed:', e);
+        btn.textContent = '✗ Error — Try Again';
+        btn.disabled = false;
+      }
+    }
+
+    function escapeHtml(text) {
+      const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+      return text.replace(/[&<>"']/g, m => map[m]);
+    }
+
+    function markdownToHtml(md) {
+      let html = md
+        .replace(/^### (.*?)$/gm, '<h3>$1</h3>')
+        .replace(/^## (.*?)$/gm, '<h2>$1</h2>')
+        .replace(/^\d+\. (.*?)$/gm, '<li>$1</li>')
+        .replace(/(<li>.*?<\/li>)/s, '<ol>$1</ol>')
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .split('\n')
+        .map(line => line.trim() ? `<p>${line}</p>` : '')
+        .join('');
+      return html;
+    }
+
+    // Initialize
+    (async () => {
+      await checkMaintenance();
+      await loadToday();
+    })();
+  </script>
+</body>
+</html>

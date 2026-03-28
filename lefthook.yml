@@ -1,0 +1,25 @@
+pre-commit:
+  commands:
+    meml-validate:
+      glob: "*.meml"
+      run: |
+        if ! command -v meml &>/dev/null; then
+          echo "⚠ meml not installed — skipping validation (install: go install github.com/caboose-mcp/meml/cmd/meml@latest)"
+          exit 0
+        fi
+        for file in {staged_files}; do
+          echo "Validating $file..."
+          meml validate "$file" || exit 1
+        done
+
+    shellcheck:
+      glob: "*.sh"
+      run: shellcheck {staged_files}
+
+    no-old-naming:
+      glob: "*.{md,sh,json,meml}"
+      run: |
+        if grep -l "nothanksona" {staged_files} 2>/dev/null; then
+          echo "Found old naming references"
+          exit 1
+        fi

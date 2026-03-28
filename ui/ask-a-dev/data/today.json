@@ -1,0 +1,40 @@
+{
+  "date": "2026-03-27",
+  "question": {
+    "id": "2026-03-27",
+    "text": "How do you handle context length limits when working with LLMs in production?",
+    "topic": "ai-tooling",
+    "source": "ml-relevance",
+    "difficulty": "intermediate",
+    "citation": {
+      "title": "OpenAI Extends Context Window to 200K",
+      "url": "https://openai.com/blog/...",
+      "source": "OpenAI Blog"
+    },
+    "posted_at": "2026-03-27T09:00:00Z",
+    "generation_metadata": {
+      "model": "claude-3-5-haiku-20241022",
+      "candidates_generated": 5,
+      "selected_by": "admin",
+      "tokens_used": {
+        "input": 450,
+        "output": 180
+      }
+    }
+  },
+  "replies": [],
+  "summary": null,
+  "moderation": {
+    "enabled": true,
+    "mode": "strict",
+    "total_attempts": 0,
+    "approved": 0,
+    "rejected": 0
+  },
+  "ai_calls": [],
+  "service_metadata": {
+    "generated_at": "2026-03-27T09:00:00Z",
+    "updated_at": "2026-03-27T09:00:00Z",
+    "schema_version": "1.0"
+  }
+}
