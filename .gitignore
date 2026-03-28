@@ -21,6 +21,7 @@ __pycache__/
 # Build
 dist/
 build/
+bin/
 *.o
 *.a
 *.so
