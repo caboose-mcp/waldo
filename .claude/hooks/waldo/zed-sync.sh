@@ -6,18 +6,16 @@
 # project's .rules file for per-project injection.
 #
 # Usage:
-#   zed-sync.sh                    # Write to ~/.config/zed/rules/waldo.md
-#   zed-sync.sh project [dir]      # Write .rules to project dir (default: cwd)
-#   zed-sync.sh print              # Print rules markdown to stdout
+#   zed-sync.sh [dir]    # Write .rules to project dir (default: cwd)
+#   zed-sync.sh print    # Print rules markdown to stdout
 #
-# After running (global mode), open Zed's Rules Library (ctrl-alt-l),
-# find waldo.md, and pin it as a default rule.
+# Zed auto-loads .rules from the project root into every Agent Panel session.
 
 set -euo pipefail
 
 WALDO_CONFIG="${WALDO_CONFIG:-$HOME/.config/waldo}"
 PERSONAS_DIR="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/personas"
-ZED_RULES_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/zed/rules"
+
 ACTIVE_FILE="$WALDO_CONFIG/.active"
 MOOD_FILE="$WALDO_CONFIG/.mood"
 
@@ -190,25 +188,14 @@ MARKDOWN
 # Output routing
 # ---------------------------------------------------------------------------
 
-MODE="${1:-global}"
+MODE="${1:-project}"
 
 case "$MODE" in
-  global)
-    mkdir -p "$ZED_RULES_DIR"
-    printf '%s\n' "$RULES" > "$ZED_RULES_DIR/waldo.md"
-    echo "waldo: ✓ wrote Zed rules → $ZED_RULES_DIR/waldo.md"
-    echo ""
-    echo "  To activate in Zed:"
-    echo "    1. Open Rules Library  ctrl-alt-l"
-    echo "    2. Locate waldo.md and click the 📎 pin icon to set as default"
-    echo "    3. Rules will inject automatically into every Agent Panel session"
-    ;;
-
   project)
     TARGET_DIR="${2:-.}"
     OUTPUT="$TARGET_DIR/.rules"
     printf '%s\n' "$RULES" > "$OUTPUT"
-    echo "waldo: ✓ wrote project rules → $OUTPUT"
+    echo "waldo: ✓ wrote .rules → $OUTPUT"
     echo "  Zed will auto-load this file in Agent Panel sessions for this project."
     ;;
 
@@ -217,11 +204,11 @@ case "$MODE" in
     ;;
 
   *)
-    echo "Usage: zed-sync.sh [global|project [dir]|print]" >&2
-    echo "" >&2
-    echo "  global           Write to $ZED_RULES_DIR/waldo.md  (default)" >&2
-    echo "  project [dir]    Write .rules to project dir (default: cwd)" >&2
-    echo "  print            Print markdown to stdout" >&2
-    exit 1
+    # Treat first arg as a directory
+    TARGET_DIR="${1:-.}"
+    OUTPUT="$TARGET_DIR/.rules"
+    printf '%s\n' "$RULES" > "$OUTPUT"
+    echo "waldo: ✓ wrote .rules → $OUTPUT"
+    echo "  Zed will auto-load this file in Agent Panel sessions for this project."
     ;;
 esac
