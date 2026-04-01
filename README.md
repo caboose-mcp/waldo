@@ -1,7 +1,6 @@
 [![CI](https://github.com/caboose-mcp/waldo/actions/workflows/ci.yml/badge.svg)](https://github.com/caboose-mcp/waldo/actions/workflows/ci.yml)
 [![Lint](https://img.shields.io/badge/Lint-MEML%20%2B%20ShellCheck-blue)](https://github.com/caboose-mcp/waldo/actions)
 [![Test](https://img.shields.io/badge/Test-E2E%20%2B%20Smoke-green)](https://github.com/caboose-mcp/waldo/actions)
-[![Coverage](https://img.shields.io/badge/Coverage-Docs%20100%25-brightgreen)](./MEML.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 **Persistent persona system for AI tools.** Define your voice, tone, and style once — then apply it everywhere.
@@ -51,7 +50,7 @@ version     = "0.1.0"
 
 [🎭 tone]
 formality   = 0.2   # 0 = very casual, 1 = very formal
-directness = 0.8   # 0 = roundabout, 1 = blunt
+directness  = 0.8   # 0 = roundabout, 1 = blunt
 humor       = 0.6   # 0 = dry, 1 = frequent wit
 hedging     = 0.1   # 0 = confident, 1 = heavily qualified
 warmth      = 0.5   # 0 = cold, 1 = enthusiastic
@@ -96,20 +95,18 @@ See [example.meml](./example.meml) for a full example.
 | **Gemini** | ✅ Manual | Same as ChatGPT |
 | **Codeium** | ✅ Manual | Same as ChatGPT |
 
-All tools use the same `~/.config/waldo/` config directory.
-
 ## Architecture
 
-**Core:** `~/.config/waldo/personas/` (XDG standard, agent-agnostic)
-- `agent/` — response personas
+**Core:** `~/.claude/personas/`
+- `agent/` — response personas (`.json` + `.meml`)
 - `code/` — code style profiles
-- `.active` — current persona
-- `.deltas` — learning history
+- `.active` — current persona name (e.g. `agent/my-voice`)
+- `agent/.deltas` — learning history for agent personas
+- `code/.deltas` — learning history for code personas
 
 **Adapters:**
 - **Claude Code** — `UserPromptSubmit` hook in `~/.claude/settings.json`
 - **Cursor** — workspace rules update on session start
-- **CLI** — `/waldo inject` prints context to stdout
 
 **Format:** MEML config with emoji annotations for readability and tooling hints.
 
@@ -129,8 +126,10 @@ All tools use the same `~/.config/waldo/` config directory.
 bash setup-waldo.sh
 
 # Or manually
-mkdir -p ~/.config/waldo/personas/{agent,code}
-curl -fsSL https://raw.githubusercontent.com/caboose-mcp/waldo/main/example.meml > ~/.config/waldo/personas/agent/default.meml
+mkdir -p ~/.claude/personas/{agent,code}
+curl -fsSL https://raw.githubusercontent.com/caboose-mcp/waldo/main/example.meml > ~/.claude/personas/agent/default.meml
+echo "agent/default" > ~/.claude/personas/.active
+mkdir -p ~/.config/waldo
 echo "agent/default" > ~/.config/waldo/.active
 ```
 
@@ -155,9 +154,9 @@ srt --settings ./waldo.srt-settings.json bash ./setup-waldo.sh
 
 The sandbox config (`waldo.srt-settings.json`) enforces:
 - **Network**: GitHub, AWS S3 APIs only (no localhost)
-- **Filesystem**: Read-only on secrets (~/.ssh, ~/.gpg); write allowed to ~/.claude and ~/.config/waldo
+- **Filesystem**: Read-only on secrets (`~/.ssh`, `~/.gpg`); writes allowed to `~/.claude` and `~/.config/waldo` (and subpaths)
 - **Execution**: Only bash, aws, jq, git allowed; no sudo/rm
-- **Audit**: All operations logged to ~/.waldo/audit.log
+- **Audit**: All operations logged to `~/.waldo/audit.log`
 
 ### S3 Sync (Optional)
 
@@ -178,10 +177,10 @@ Now personas auto-sync between machines on `SessionStart` hook.
 ```bash
 # Create persona from your Slack
 /waldo slack-import
-# → Save as: chris-marasco
+# → Save as: my-voice
 
 # Use it
-/waldo use agent/chris-marasco
+/waldo use agent/my-voice
 
 # Have a conversation
 (chat with Claude...)
@@ -201,7 +200,7 @@ Now personas auto-sync between machines on `SessionStart` hook.
 
 # Your persona is active with new tone updates
 /waldo list
-# → agent/chris-marasco [active]
+# → agent/my-voice [active]
 
 # Continue chatting with your exact voice
 (chat with Claude...)
@@ -219,7 +218,7 @@ echo '{}' | bash ~/.claude/hooks/waldo/inject-persona.sh
 **MEML validation error?**
 
 ```bash
-meml validate ~/.config/waldo/personas/agent/my-voice.meml
+meml validate ~/.claude/personas/agent/my-voice.meml
 # Shows line number and error
 ```
 
@@ -233,13 +232,11 @@ aws s3 ls s3://my-personas/
 **Lost a persona?**
 
 ```bash
-ls ~/.config/waldo/personas/agent/*.backup.*
+ls ~/.claude/personas/agent/*.backup.*
 # Restore: cp persona.json.backup.TIMESTAMP persona.json
 ```
 
 ## Development
-
-### Building
 
 ```bash
 # Test setup script
@@ -247,20 +244,12 @@ bash setup-waldo.sh
 
 # Validate all MEML files
 meml validate example.meml
-find ~/.config/waldo/personas -name "*.meml" -exec meml validate {} \;
 
 # Run linter
 shellcheck setup-waldo.sh .claude/hooks/waldo/*.sh
 ```
 
-### Contributing
-
-This is an experimental system. Feedback and PRs welcome.
-
-- Add new tone dimensions to the schema
-- Build new adapters (Codeium, Vim, etc.)
-- Design new mood overlays
-- Improve MEML emoji conventions
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for full contribution guide.
 
 ## License
 
@@ -268,17 +257,6 @@ MIT
 
 ---
 
-**Full docs:**
-- [Setup Guide](./WALDO-SETUP.md)
-- [Skill Reference](./waldo-SKILL-v5.md)
-- [MEML Format Guide](./MEML.md) — How to write personas
-- [Quick Start](./QUICK-START.md)
-- [DEMO](./DEMO.md)
+**Docs:** [MEML Format](./MEML.md) · [Skill Reference](./waldo-SKILL-v5.md) · [Contributing](./CONTRIBUTING.md)
 
-**Related:**
-- [meml](https://github.com/caboose-mcp/meml) — config language
-- [caboose-mcp](https://github.com/caboose-mcp) — AI tools org
-
----
-
-> not because of that one (but it is funny though) — he sort of disappears, iykyk 👀 still love and respect him tho
+**Related:** [meml](https://github.com/caboose-mcp/meml) · [caboose-mcp](https://github.com/caboose-mcp)
