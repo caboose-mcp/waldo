@@ -50,7 +50,7 @@ The **Waldo Playground** is an interactive, zero-installation sandbox for experi
 
 #### Technical Details
 - **Size:** ~25 KB HTML, ~14 KB JS (uncompressed)
-- **Dependencies:** CodeMirror 5 (CDN-loaded)
+- **Dependencies:** CodeMirror 5 (vendored in `ui/lib/codemirror/`, no external requests)
 - **Browser Support:** Chrome, Firefox, Safari, Edge (all modern versions)
 - **Performance:** <100ms interactivity, instant updates
 - **Deployment:** GitHub Pages (automatic on push)
@@ -198,7 +198,7 @@ These are deferred to Phase 2+ for MVP simplicity:
 
 ## Performance
 
-- **Load Time:** ~500ms (includes CodeMirror from CDN)
+- **Load Time:** ~500ms (CodeMirror loaded from vendored local files)
 - **Editor Response:** <100ms (CodeMirror native)
 - **Slider Update:** <50ms (JavaScript parser)
 - **Copy Action:** Instant

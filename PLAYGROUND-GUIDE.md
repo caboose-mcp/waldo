@@ -28,8 +28,8 @@
 
 **Tech Stack:**
 - HTML5, vanilla JavaScript
-- CodeMirror 5 (CDN) for editing
-- No backend, no build step
+- CodeMirror 5 (vendored in `ui/lib/codemirror/`) for editing
+- No backend, no build step, no external requests
 - ~100KB total size (uncompressed)
 
 ---
@@ -257,8 +257,8 @@ npm install --save-dev @playwright/test
 
 ### "CodeMirror not loading"
 
-**Cause:** CDN timeout or offline
-**Fix:** Fallback to `<textarea>` is already implemented
+**Cause:** Vendored files missing or path incorrect
+**Fix:** Verify `ui/lib/codemirror/codemirror.js`, `codemirror.css`, and required addons exist
 
 ### "Styles look wrong"
 
