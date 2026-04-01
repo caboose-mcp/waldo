@@ -277,8 +277,8 @@ echo
 echo -e "${GREEN}What's Ready:${NC}"
 echo "  ✓ Personas directory: ${PERSONAS_DIR}"
 echo "  ✓ Default persona active"
-echo "  ✓ Hook scripts: ${HOOKS_DIR}
-  ✓ /waldo skill: ${SKILLS_DIR}/SKILL.md"
+echo "  ✓ Hook scripts: ${HOOKS_DIR}"
+echo "  ✓ /waldo skill: ${SKILLS_DIR}/SKILL.md"
 if [[ $SETUP_S3 =~ ^[Yy]$ ]]; then
   echo "  ✓ S3 sync configured"
 fi
