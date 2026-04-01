@@ -2,44 +2,43 @@
 
 ## Local Development Setup
 
-### Install left hook
+### Install lefthook
 
-waldo uses **left** for pre-commit checks (lint, validate, test).
+waldo uses **lefthook** for pre-commit checks (lint, validate, shellcheck).
 
 ```bash
-# Install left
-curl https://raw.githubusercontent.com/evilmartians/left/master/install | bash
+# Install lefthook (if not already installed)
+go install github.com/evilmartians/lefthook@latest
 
 # Install git hooks
-left install
+lefthook install
 
-# Run checks before commit
-left run pre-commit
+# Run checks manually
+lefthook run pre-commit
 ```
 
-### What left checks
+### What lefthook checks
 
 - **MEML validation** — `meml validate *.meml`
 - **Shell linting** — `shellcheck *.sh`
 - **No old naming refs** — blocks commits with legacy system name
-- **Markdown lint** — warns on style issues
 
 ### Running checks manually
 
 ```bash
 # All pre-commit checks
-left run pre-commit
+lefthook run pre-commit
 
 # Specific check
-left run meml
-left run shellcheck
+lefthook run meml
+lefthook run shellcheck
 ```
 
 ## CI/CD Pipeline
 
-GitHub Actions runs on every push to `main` and PR:
+GitHub Actions runs on every push to `main` and on PRs:
 
-1. **Lint** — MEML, shell, markdown validation
+1. **Lint** — MEML, shell validation
 2. **Build** — shell script syntax check
 3. **Test** — MEML parsing, status line hook, mood overlay
 4. **Coverage** — docs coverage report
@@ -54,14 +53,14 @@ See `.github/workflows/ci.yml` for details.
    git checkout -b feature/your-feature
    ```
 
-2. **Make changes and run left:**
+2. **Make changes and run lefthook:**
    ```bash
-   left run pre-commit
+   lefthook run pre-commit
    ```
 
 3. **Commit:**
    ```bash
-   git commit -m "Your message"
+   git commit -m "feat: your message"
    ```
 
 4. **Push and open PR:**
@@ -71,7 +70,7 @@ See `.github/workflows/ci.yml` for details.
 
 ## Adding New Personas
 
-Personas are stored as `.meml` files in `~/.config/waldo/personas/agent/`:
+Personas are stored as `.meml` files in `~/.claude/personas/agent/`:
 
 ```meml
 [🪪 meta]
@@ -81,7 +80,7 @@ version     = "0.1.0"
 
 [🎭 tone]
 formality   = 0.5
-directness = 0.8
+directness  = 0.8
 humor       = 0.6
 hedging     = 0.1
 warmth      = 0.5
@@ -89,30 +88,24 @@ warmth      = 0.5
 
 Validate before committing:
 ```bash
-meml validate ~/.config/waldo/personas/agent/my-voice.meml
+meml validate ~/.claude/personas/agent/my-voice.meml
 ```
 
 ## Testing
 
-Smoke tests run in CI:
+Smoke tests run in CI. To test locally:
 
-- MEML file parsing
-- Status line hook output
-- Mood overlay detection
-
-To test locally:
 ```bash
 export HOME=/tmp/test-home
-mkdir -p $HOME/.config/waldo
-echo "agent/default" > $HOME/.config/waldo/.active
+mkdir -p $HOME/.claude/personas/agent
+echo "agent/default" > $HOME/.claude/personas/.active
 bash .claude/hooks/waldo/status-line.sh
 ```
 
 ## Documentation
 
-- [README.md](./README.md) — Overview, quick start
+- [README.md](./README.md) — Overview and quick start
 - [MEML.md](./MEML.md) — MEML format reference
-- [WALDO.md](./WALDO.md) — System architecture
 - [waldo-SKILL-v5.md](./waldo-SKILL-v5.md) — Full skill reference
 
 Update docs when adding features.
@@ -121,9 +114,8 @@ Update docs when adding features.
 
 1. Create tag: `git tag v0.2.0`
 2. Push: `git push origin v0.2.0`
-3. GitHub Actions creates release automatically
-4. Add release notes to GitHub
+3. GitHub Actions creates the release automatically
 
 ---
 
-Questions? Check [WALDO.md](./WALDO.md) or open an issue.
+Questions? Open an issue.
