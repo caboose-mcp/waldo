@@ -161,7 +161,31 @@ else
 fi
 echo
 
-# 7. S3 bucket menu
+# 7. Install waldo skill
+echo -e "${YELLOW}Installing /waldo skill...${NC}"
+
+SKILLS_DIR="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/skills/waldo"
+mkdir -p "$SKILLS_DIR"
+
+SKILL_SRC="$SCRIPT_DIR/waldo-SKILL-v5.md"
+SKILL_DEST="$SKILLS_DIR/SKILL.md"
+
+if [ -f "$SKILL_SRC" ]; then
+  # Symlink so edits to the repo are reflected immediately
+  ln -sf "$SKILL_SRC" "$SKILL_DEST"
+  echo -e "${GREEN}✓ Skill installed (symlinked): ${SKILL_DEST}${NC}"
+else
+  SKILL_URL="https://raw.githubusercontent.com/caboose-mcp/waldo/main/waldo-SKILL-v5.md"
+  if curl -fsSL "$SKILL_URL" -o "$SKILL_DEST" 2>/dev/null; then
+    echo -e "${GREEN}✓ Skill downloaded: ${SKILL_DEST}${NC}"
+  else
+    echo -e "${YELLOW}⚠ Could not install skill — copy manually:${NC}"
+    echo "  cp <waldo-repo>/waldo-SKILL-v5.md ~/.claude/skills/waldo/SKILL.md"
+  fi
+fi
+echo
+
+# 8. S3 bucket menu
 echo -e "${YELLOW}S3 Cross-Machine Sync (Optional)${NC}"
 read -p "Setup S3 sync? (y/n) " -n 1 -r SETUP_S3
 echo
@@ -237,14 +261,14 @@ if [[ $SETUP_S3 =~ ^[Yy]$ ]]; then
   echo
 fi
 
-# 8. Initialize deltas
+# 9. Initialize deltas
 echo -e "${YELLOW}Initializing learning deltas...${NC}"
 echo "[]" > "$PERSONAS_DIR/agent/.deltas"
 echo "[]" > "$PERSONAS_DIR/code/.deltas"
 echo -e "${GREEN}✓ Delta files initialized${NC}"
 echo
 
-# 9. Summary
+# 10. Summary
 echo -e "${BLUE}╔════════════════════════════════════════╗${NC}"
 echo -e "${BLUE}║  Setup Complete!                       ║${NC}"
 echo -e "${BLUE}╚════════════════════════════════════════╝${NC}"
@@ -253,16 +277,15 @@ echo
 echo -e "${GREEN}What's Ready:${NC}"
 echo "  ✓ Personas directory: ${PERSONAS_DIR}"
 echo "  ✓ Default persona active"
-echo "  ✓ Hook scripts: ${HOOKS_DIR}"
+echo "  ✓ Hook scripts: ${HOOKS_DIR}
+  ✓ /waldo skill: ${SKILLS_DIR}/SKILL.md"
 if [[ $SETUP_S3 =~ ^[Yy]$ ]]; then
   echo "  ✓ S3 sync configured"
 fi
 echo
 
 echo -e "${BLUE}Quick Start:${NC}"
-echo "  1. Import waldo skill:"
-echo "     /waldo import"
-echo "     (paste from: https://github.com/caboose-mcp/waldo)"
+echo "  1. Restart Claude Code (skills load at startup)"
 echo
 echo "  2. Create a persona:"
 echo "     /waldo new my-voice"

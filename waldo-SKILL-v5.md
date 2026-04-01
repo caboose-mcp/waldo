@@ -10,7 +10,9 @@ Manage response personas that shape Claude's tone, verbosity, and voice style.
 
 ## Persona file location
 
-All personas live at `~/.claude/personas/<name>.json`. The active persona name is stored in `~/.claude/personas/.active` as plain text. A `UserPromptSubmit` hook reads `.active` on every prompt and injects the persona as context.
+All personal personas live at `~/.claude/personas/agent/<name>.json` (and optionally `<name>.meml` alongside it). The active persona name is stored in `~/.claude/personas/.active` as plain text. A `UserPromptSubmit` hook reads `.active` on every prompt and injects the persona as context.
+
+**Important:** Personal personas are always written to `~/.claude/personas/agent/` — local machine storage, synced to S3 for cross-machine access. They are never committed to a project repo. MEML files in a project repo (e.g. `ask-a-dev/personas/bot.meml`) are service-level personas baked into a specific application, not personal Claude personas.
 
 ## Subcommands
 
@@ -51,8 +53,8 @@ Create a new persona interactively.
    - Verbosity: response_length (concise/adaptive/verbose), reading_level (casual/professional/technical), format_preference (prose/bullets/adaptive)
    - Voice: words to avoid, words to prefer, custom phrases
    - VTT: whether to enable caption mode
-2. Build the JSON structure following the schema.
-3. Write to `~/.claude/personas/<name>.json`.
+2. Build the JSON structure following the schema. Also write a MEML version for human-readable authoring.
+3. Write both to `~/.claude/personas/agent/<name>.json` and `~/.claude/personas/agent/<name>.meml`. Never write to the project repo.
 4. Ask if the user wants to activate it now.
 
 ### `/waldo edit <name>`
