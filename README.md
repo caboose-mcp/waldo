@@ -101,12 +101,12 @@ See [example.meml](./example.meml) for a full example.
 - `agent/` — response personas (`.json` + `.meml`)
 - `code/` — code style profiles
 - `.active` — current persona name (e.g. `agent/my-voice`)
-- `.deltas` — learning history
+- `agent/.deltas` — learning history for agent personas
+- `code/.deltas` — learning history for code personas
 
 **Adapters:**
 - **Claude Code** — `UserPromptSubmit` hook in `~/.claude/settings.json`
 - **Cursor** — workspace rules update on session start
-- **CLI** — `/waldo inject` prints context to stdout
 
 **Format:** MEML config with emoji annotations for readability and tooling hints.
 
@@ -129,6 +129,8 @@ bash setup-waldo.sh
 mkdir -p ~/.claude/personas/{agent,code}
 curl -fsSL https://raw.githubusercontent.com/caboose-mcp/waldo/main/example.meml > ~/.claude/personas/agent/default.meml
 echo "agent/default" > ~/.claude/personas/.active
+mkdir -p ~/.config/waldo
+echo "agent/default" > ~/.config/waldo/.active
 ```
 
 **Hardened (Sandbox Runtime — macOS/Linux):**
@@ -152,7 +154,7 @@ srt --settings ./waldo.srt-settings.json bash ./setup-waldo.sh
 
 The sandbox config (`waldo.srt-settings.json`) enforces:
 - **Network**: GitHub, AWS S3 APIs only (no localhost)
-- **Filesystem**: Read-only on secrets (`~/.ssh`, `~/.gpg`); write allowed to `~/.claude`
+- **Filesystem**: Read-only on secrets (`~/.ssh`, `~/.gpg`); writes allowed to `~/.claude` and `~/.config/waldo` (and subpaths)
 - **Execution**: Only bash, aws, jq, git allowed; no sudo/rm
 - **Audit**: All operations logged to `~/.waldo/audit.log`
 

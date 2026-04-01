@@ -97,8 +97,9 @@ Smoke tests run in CI. To test locally:
 
 ```bash
 export HOME=/tmp/test-home
-mkdir -p $HOME/.claude/personas/agent
-echo "agent/default" > $HOME/.claude/personas/.active
+mkdir -p "$HOME/.claude/personas/agent"
+mkdir -p "$HOME/.config/waldo"
+echo "agent/default" > "$HOME/.config/waldo/.active"
 bash .claude/hooks/waldo/status-line.sh
 ```
 
