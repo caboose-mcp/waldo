@@ -62,7 +62,7 @@ if [ -d "$PERSONAS_DIR" ]; then
   read -p "Overwrite? (y/n) " -n 1 -r < /dev/tty
   echo
   if [[ $REPLY =~ ^[Yy]$ ]]; then
-    [ -z "${PERSONAS_DIR:-}" ] && { echo "PERSONAS_DIR is empty, aborting"; exit 1; }
+    [[ -z "$PERSONAS_DIR" ]] && { echo "PERSONAS_DIR is empty, aborting"; exit 1; }
     rm -rf "$PERSONAS_DIR"
   else
     echo "Using existing directory"
@@ -200,10 +200,14 @@ if [[ $SETUP_S3 =~ ^[Yy]$ ]]; then
 
   if [ -n "$EXISTING" ]; then
     echo "Your S3 buckets:"
+    # $EXISTING is intentionally unquoted to word-split bucket names into select options
     select BUCKET in $EXISTING "Create new bucket"; do
       if [ "$BUCKET" = "Create new bucket" ]; then
         read -rp "  New bucket name: " NEW_BUCKET < /dev/tty
-        if [[ ! "$NEW_BUCKET" =~ ^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$ ]]; then
+        # AWS rules: lowercase alphanum/hyphens/dots, no consecutive dots, no dot-hyphen, no IP format
+        if [[ ! "$NEW_BUCKET" =~ ^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*$ ]] \
+           || [[ ${#NEW_BUCKET} -lt 3 || ${#NEW_BUCKET} -gt 63 ]] \
+           || [[ "$NEW_BUCKET" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
           echo -e "  ${RED}✗ Invalid bucket name (lowercase alphanumeric, dots, hyphens only)${NC}"
           SETUP_S3=
           break
@@ -223,7 +227,10 @@ if [[ $SETUP_S3 =~ ^[Yy]$ ]]; then
     done < /dev/tty
   else
     read -rp "  New bucket name (e.g., my-personas): " BUCKET < /dev/tty
-    if [[ ! "$BUCKET" =~ ^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$ ]]; then
+    # AWS rules: lowercase alphanum/hyphens/dots, no consecutive dots, no dot-hyphen, no IP format
+    if [[ ! "$BUCKET" =~ ^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*$ ]] \
+       || [[ ${#BUCKET} -lt 3 || ${#BUCKET} -gt 63 ]] \
+       || [[ "$BUCKET" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
       echo -e "  ${RED}✗ Invalid bucket name (lowercase alphanumeric, dots, hyphens only)${NC}"
       SETUP_S3=
     elif aws s3api create-bucket --bucket "$BUCKET" --region us-east-1 2>/dev/null; then
@@ -244,8 +251,10 @@ if [[ $SETUP_S3 =~ ^[Yy]$ ]]; then
     if [ -f "$SETTINGS_FILE" ]; then
       echo -e "${YELLOW}Updating ${SETTINGS_FILE}...${NC}"
 
-      # Backup
-      cp "$SETTINGS_FILE" "${SETTINGS_FILE}.backup.$(date +%s)"
+      # Backup (immediately restrict permissions in case original was world-readable)
+      BACKUP_FILE="${SETTINGS_FILE}.backup.$(date +%s)"
+      cp "$SETTINGS_FILE" "$BACKUP_FILE"
+      chmod 600 "$BACKUP_FILE"
 
       # Update env vars
       jq --arg profile "$AWS_PROFILE" --arg region "us-east-1" \
