@@ -1,8 +1,8 @@
 #!/bin/bash
 # waldo — Cross-machine persona sync setup
-# One-liner: curl -fsSL https://raw.githubusercontent.com/caboose-mcp/waldo/demo/dual-domain/setup-waldo.sh | bash
+# Install: curl -fsSL https://raw.githubusercontent.com/caboose-mcp/waldo/main/setup-waldo.sh -o setup-waldo.sh && bash setup-waldo.sh
 
-set -e
+set -eu
 
 # Colors
 RED='\033[0;31m'
@@ -59,9 +59,10 @@ PERSONAS_DIR="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/personas"
 
 if [ -d "$PERSONAS_DIR" ]; then
   echo -e "${YELLOW}Found existing: ${PERSONAS_DIR}${NC}"
-  read -p "Overwrite? (y/n) " -n 1 -r
+  read -p "Overwrite? (y/n) " -n 1 -r < /dev/tty
   echo
   if [[ $REPLY =~ ^[Yy]$ ]]; then
+    [[ -z "$PERSONAS_DIR" ]] && { echo "PERSONAS_DIR is empty, aborting"; exit 1; }
     rm -rf "$PERSONAS_DIR"
   else
     echo "Using existing directory"
@@ -187,7 +188,7 @@ echo
 
 # 8. S3 bucket menu
 echo -e "${YELLOW}S3 Cross-Machine Sync (Optional)${NC}"
-read -p "Setup S3 sync? (y/n) " -n 1 -r SETUP_S3
+read -p "Setup S3 sync? (y/n) " -n 1 -r SETUP_S3 < /dev/tty
 echo
 
 if [[ $SETUP_S3 =~ ^[Yy]$ ]]; then
@@ -199,9 +200,18 @@ if [[ $SETUP_S3 =~ ^[Yy]$ ]]; then
 
   if [ -n "$EXISTING" ]; then
     echo "Your S3 buckets:"
+    # $EXISTING is intentionally unquoted to word-split bucket names into select options
     select BUCKET in $EXISTING "Create new bucket"; do
       if [ "$BUCKET" = "Create new bucket" ]; then
-        read -rp "  New bucket name: " NEW_BUCKET
+        read -rp "  New bucket name: " NEW_BUCKET < /dev/tty
+        # AWS rules: lowercase alphanum/hyphens/dots, no consecutive dots, no dot-hyphen, no IP format
+        if [[ ! "$NEW_BUCKET" =~ ^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*$ ]] \
+           || [[ ${#NEW_BUCKET} -lt 3 || ${#NEW_BUCKET} -gt 63 ]] \
+           || [[ "$NEW_BUCKET" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          echo -e "  ${RED}✗ Invalid bucket name (lowercase alphanumeric, dots, hyphens only)${NC}"
+          SETUP_S3=
+          break
+        fi
         if aws s3api create-bucket --bucket "$NEW_BUCKET" --region us-east-1 2>/dev/null; then
           BUCKET="$NEW_BUCKET"
           echo -e "  ${GREEN}✓ Bucket created: ${BUCKET}${NC}"
@@ -214,10 +224,16 @@ if [[ $SETUP_S3 =~ ^[Yy]$ ]]; then
       if [ -n "$BUCKET" ]; then
         break
       fi
-    done
+    done < /dev/tty
   else
-    read -rp "  New bucket name (e.g., my-personas): " BUCKET
-    if aws s3api create-bucket --bucket "$BUCKET" --region us-east-1 2>/dev/null; then
+    read -rp "  New bucket name (e.g., my-personas): " BUCKET < /dev/tty
+    # AWS rules: lowercase alphanum/hyphens/dots, no consecutive dots, no dot-hyphen, no IP format
+    if [[ ! "$BUCKET" =~ ^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*$ ]] \
+       || [[ ${#BUCKET} -lt 3 || ${#BUCKET} -gt 63 ]] \
+       || [[ "$BUCKET" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+      echo -e "  ${RED}✗ Invalid bucket name (lowercase alphanumeric, dots, hyphens only)${NC}"
+      SETUP_S3=
+    elif aws s3api create-bucket --bucket "$BUCKET" --region us-east-1 2>/dev/null; then
       echo -e "  ${GREEN}✓ Bucket created: ${BUCKET}${NC}"
     else
       echo -e "  ${RED}✗ Failed to create bucket${NC}"
@@ -227,7 +243,7 @@ if [[ $SETUP_S3 =~ ^[Yy]$ ]]; then
 
   if [[ $SETUP_S3 =~ ^[Yy]$ ]]; then
     echo
-    read -rp "  AWS profile (default: default): " AWS_PROFILE
+    read -rp "  AWS profile (default: default): " AWS_PROFILE < /dev/tty
     AWS_PROFILE="${AWS_PROFILE:-default}"
 
     # Update settings.json
@@ -235,11 +251,16 @@ if [[ $SETUP_S3 =~ ^[Yy]$ ]]; then
     if [ -f "$SETTINGS_FILE" ]; then
       echo -e "${YELLOW}Updating ${SETTINGS_FILE}...${NC}"
 
-      # Backup
-      cp "$SETTINGS_FILE" "${SETTINGS_FILE}.backup.$(date +%s)"
+      # Backup (immediately restrict permissions in case original was world-readable)
+      BACKUP_FILE="${SETTINGS_FILE}.backup.$(date +%s)"
+      cp "$SETTINGS_FILE" "$BACKUP_FILE"
+      chmod 600 "$BACKUP_FILE"
 
       # Update env vars
-      jq ".env.AWS_PROFILE = \"$AWS_PROFILE\" | .env.AWS_REGION = \"us-east-1\"" "$SETTINGS_FILE" > "${SETTINGS_FILE}.tmp" && mv "${SETTINGS_FILE}.tmp" "$SETTINGS_FILE"
+      jq --arg profile "$AWS_PROFILE" --arg region "us-east-1" \
+        '.env.AWS_PROFILE = $profile | .env.AWS_REGION = $region' \
+        "$SETTINGS_FILE" > "${SETTINGS_FILE}.tmp" && mv "${SETTINGS_FILE}.tmp" "$SETTINGS_FILE"
+      chmod 600 "$SETTINGS_FILE"
 
       echo -e "  ${GREEN}✓ env.AWS_PROFILE = ${AWS_PROFILE}${NC}"
       echo -e "  ${GREEN}✓ env.AWS_REGION = us-east-1${NC}"
