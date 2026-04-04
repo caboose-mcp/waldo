@@ -139,7 +139,7 @@ echo "agent/default" > ~/.config/waldo/.active
 
 **Hardened (Sandbox Runtime — macOS/Linux):**
 
-Install with network, filesystem, and capability restrictions using [Anthropic Sandbox Runtime](https://github.com/anthropics/sandbox-runtime):
+Install with network, filesystem, and capability restrictions using [Anthropic Sandbox Runtime](https://github.com/anthropic-experimental/sandbox-runtime):
 
 ```bash
 # Install srt
