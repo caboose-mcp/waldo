@@ -259,7 +259,7 @@ if [[ $SETUP_S3 =~ ^[Yy]$ ]]; then
       # Update env vars — AWS_PROFILE, AWS_REGION, and WALDO_S3_BUCKET
       # WALDO_S3_BUCKET is read by s3-sync.sh at runtime so hooks need no args
       jq --arg profile "$AWS_PROFILE" --arg region "us-east-1" --arg bucket "$BUCKET" \
-        '.env.AWS_PROFILE = $profile | .env.AWS_REGION = $region | .env.WALDO_S3_BUCKET = $bucket' \
+        '.env = (.env // {}) | .env.AWS_PROFILE = $profile | .env.AWS_REGION = $region | .env.WALDO_S3_BUCKET = $bucket' \
         "$SETTINGS_FILE" > "${SETTINGS_FILE}.tmp" && mv "${SETTINGS_FILE}.tmp" "$SETTINGS_FILE"
       chmod 600 "$SETTINGS_FILE"
 
@@ -269,7 +269,7 @@ if [[ $SETUP_S3 =~ ^[Yy]$ ]]; then
 
       # Wire up SessionStart hook so personas are pulled on every session open.
       # The hook exits 0 on any failure (graceful), so it never blocks Claude Code.
-      HOOK_CMD="Bash(timeout 15 bash ~/.claude/hooks/waldo/s3-sync.sh pull &)"
+      HOOK_CMD="Bash(timeout 15 bash ${HOOKS_DIR}/s3-sync.sh pull &)"
       jq --arg cmd "$HOOK_CMD" \
         '.hooks.SessionStart = ((.hooks.SessionStart // []) | if type == "array" then . else [.] end | if index($cmd) == null then . + [$cmd] else . end)' \
         "$SETTINGS_FILE" > "${SETTINGS_FILE}.tmp" && mv "${SETTINGS_FILE}.tmp" "$SETTINGS_FILE"

@@ -54,9 +54,15 @@ bail() {
 
 MODE="${1:-}"
 if [[ -z "$MODE" ]]; then
-  echo "Usage: s3-sync.sh push|pull [bucket] [profile]" >&2
-  exit 1
+  bail "Usage: s3-sync.sh push|pull [bucket] [profile]"
 fi
+
+case "$MODE" in
+  push|pull) ;;
+  *)
+    bail "Unknown mode '$MODE'. Usage: s3-sync.sh push|pull [bucket] [profile]"
+    ;;
+esac
 
 # Args take precedence over env vars
 BUCKET="${2:-${WALDO_S3_BUCKET:-}}"
@@ -96,7 +102,13 @@ S3_URI="s3://${BUCKET}/${S3_PREFIX}"
 
 EXCLUDES=(
   "--exclude" ".deltas"
+  "--exclude" ".deltas/*"
+  "--exclude" "*/.deltas"
+  "--exclude" "*/.deltas/*"
+  "--exclude" ".cache"
   "--exclude" ".cache/*"
+  "--exclude" "*/.cache"
+  "--exclude" "*/.cache/*"
   "--exclude" "*.backup.*"
   "--exclude" "*.tmp"
 )
@@ -108,12 +120,18 @@ EXCLUDES=(
 do_push() {
   log "push → $S3_URI (profile: $PROFILE)"
 
+  local delete_flag=()
+  if [[ "${WALDO_S3_DELETE_REMOTE:-}" == "1" ]]; then
+    delete_flag=("--delete")
+    log "push: --delete enabled (WALDO_S3_DELETE_REMOTE=1)"
+  fi
+
   local output
   if output=$(
     aws --profile "$PROFILE" --region "$REGION" \
       s3 sync "$PERSONAS_DIR" "$S3_URI" \
       "${EXCLUDES[@]}" \
-      --delete \
+      "${delete_flag[@]}" \
       --quiet \
       2>&1
   ); then
@@ -153,8 +171,4 @@ do_pull() {
 case "$MODE" in
   push) do_push ;;
   pull) do_pull ;;
-  *)
-    echo "Unknown mode: $MODE (expected push or pull)" >&2
-    exit 1
-    ;;
 esac
