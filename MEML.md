@@ -51,13 +51,12 @@ words_per_minute   = 160
 pacing_indicators  = ❌
 caption_format     = "srt"
 
-[⚙️ workflow]
-[pre_pr]
+[⚙️ workflow.pre_pr]
 required = ✅
 steps    = ["owasp_top10_review", "lint", "test", "build"]
 note     = ~  # optional context shown alongside the checklist
 
-[git]
+[⚙️ workflow.git]
 branch_from             = "main"         # always cut branches from here
 sync_base_before_branch = ✅             # pull base branch before cutting a new branch
 no_direct_push          = ["main"]       # branches that must never be pushed to directly
