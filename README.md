@@ -114,23 +114,27 @@ See [example.meml](./example.meml) for a full example.
 - `personas/agent/.deltas` — learning history for agent personas
 - `personas/code/.deltas` — learning history for code personas
 
-S3 config (`WALDO_S3_BUCKET`, `AWS_PROFILE`) is stored in `~/.claude/settings.json`. Active persona falls back to `~/.claude/personas/.active` for backwards compatibility.
+**Current Claude hook/installer compatibility:** the shipped installer and hook scripts still use `~/.claude/personas` as the persona directory. S3 config (`WALDO_S3_BUCKET`, `AWS_PROFILE`) is stored in `~/.claude/settings.json`, and the active persona also falls back to `~/.claude/personas/.active` for backwards compatibility.
+
+If you are using the current Claude/Cursor/Zed hook scripts from this repo, keep personas in sync between `~/.config/waldo/personas/` and `~/.claude/personas/` until those hooks are migrated to the new layout.
 
 **Adapters:**
 - **Claude Code** — `UserPromptSubmit` hook in `~/.claude/settings.json`
 - **Cursor** — `.cursorrules` file in project root via `waldo-cursor-sync`
 - **Zed** — `.rules` file in project root via `waldo-zed-sync`
 
-**CLI binaries** (installed by `setup-waldo.sh`):
+**CLI binaries** (build/install separately; not installed by `setup-waldo.sh`):
 
-| Binary | What It Does |
-|--------|-------------|
+Install from the repository root with `go install ./cmd/...` or build the individual commands you need.
+
+| Binary | Status / What It Does |
+|--------|------------------------|
 | `waldo-tui` | Interactive TUI: S3 bucket picker, script fetch/inspect, status |
 | `waldo-status` | Terminal status bar (git branch + build + persona) |
 | `waldo-cursor-sync` | Sync active persona to `.cursorrules` in current project |
 | `waldo-zed-sync` | Sync active persona to `.rules` for Zed AI Agent Panel |
 | `waldo-project` | Scaffold new projects using persona templates (stub, v0.3) |
-| `waldo-registry` | Persona marketplace with Hanko auth (planned, v1.1) |
+| `waldo-registry` | Planned persona marketplace with Hanko auth (v1.1) |
 
 **Format:** MEML config with emoji annotations for readability and tooling hints.
 
@@ -150,8 +154,9 @@ S3 config (`WALDO_S3_BUCKET`, `AWS_PROFILE`) is stored in `~/.claude/settings.js
 bash setup-waldo.sh
 
 # Or manually
-mkdir -p ~/.config/waldo/personas/{agent,code}
-curl -fsSL https://raw.githubusercontent.com/caboose-mcp/waldo/main/example.meml > ~/.config/waldo/personas/agent/default.meml
+mkdir -p ~/.claude/personas/{agent,code}
+curl -fsSL https://raw.githubusercontent.com/caboose-mcp/waldo/main/example.meml > ~/.claude/personas/agent/default.meml
+mkdir -p ~/.config/waldo
 echo "agent/default" > ~/.config/waldo/.active
 ```
 
@@ -261,8 +266,8 @@ ls ~/.config/waldo/personas/agent/*.backup.*
 ## Development
 
 ```bash
-# Build all Go binaries
-go build ./cmd/...
+# Install all Go binaries
+go install ./cmd/...
 
 # Test setup script
 bash setup-waldo.sh

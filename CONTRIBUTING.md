@@ -2,13 +2,13 @@
 
 ## Local Development Setup
 
-### Build Go binaries
+### Install Go binaries
 
 ```bash
-go build ./cmd/...
+go install ./cmd/...
 ```
 
-This produces: `waldo-tui`, `waldo-status`, `waldo-cursor-sync`, `waldo-zed-sync`, `waldo-project`, `waldo-registry`.
+This installs: `waldo-tui`, `waldo-status`, `waldo-cursor-sync`, `waldo-zed-sync`, `waldo-project`, `waldo-registry`, `waldo-setup-ask-a-dev`.
 
 ### Install lefthook
 
