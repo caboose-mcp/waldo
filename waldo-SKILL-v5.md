@@ -1,6 +1,6 @@
 ---
 name: waldo
-description: Manage Claude response personas — agent (tone, voice) and code (style, conventions). Subcommands: use, list, edit, export, import, slack-import, mood, learn (agent); code-scan, code-style (code). Use when switching personas, tweaking voice/tone, analyzing Slack, applying mood overlays, learning from session (agent), or scanning/viewing code style conventions (code). Cross-machine sync via S3.
+description: Manage Claude response personas — agent (tone, voice) and code (style, conventions). Subcommands: use, list, edit, export, import, slack-import, mood, learn, sync (agent); code-scan, code-style (code). Use when switching personas, tweaking voice/tone, analyzing Slack, applying mood overlays, learning from session, or syncing to/from S3 (agent), or scanning/viewing code style conventions (code).
 user_invocable: true
 ---
 
@@ -338,6 +338,49 @@ Merge all recorded deltas into the active persona.
 3. Backs up the original persona before merging
 4. Clears the deltas file after successful merge
 5. Confirm: "Persona updated. X deltas merged with decay weighting."
+6. If S3 sync is configured (`WALDO_S3_BUCKET` is set), push the updated persona:
+   ```
+   bash ~/.claude/hooks/waldo/s3-sync.sh push
+   ```
+   Confirm: "Pushed to S3." (or log the error and continue if sync fails)
+
+---
+
+### `/waldo sync`
+
+Manually push or pull personas to/from S3.
+
+**Usage:**
+- `/waldo sync push` — upload local personas to S3
+- `/waldo sync pull` — download personas from S3
+- `/waldo sync status` — show sync config (bucket, profile, last sync log tail)
+
+**Steps for each subcommand:**
+
+`/waldo sync push`:
+1. Check `WALDO_S3_BUCKET` is set; if not, reply: "S3 sync not configured. Run `setup-waldo.sh` or add `WALDO_S3_BUCKET` to `~/.claude/settings.json` env."
+2. Run: `bash ~/.claude/hooks/waldo/s3-sync.sh push`
+3. Confirm: "Pushed personas to s3://$WALDO_S3_BUCKET/personas/" or surface the error from the log.
+
+`/waldo sync pull`:
+1. Check `WALDO_S3_BUCKET` is set; if not, show same setup message.
+2. Run: `bash ~/.claude/hooks/waldo/s3-sync.sh pull`
+3. Confirm: "Pulled personas from s3://$WALDO_S3_BUCKET/personas/" or surface the error.
+
+`/waldo sync status`:
+1. Read `WALDO_S3_BUCKET`, `AWS_PROFILE`, `AWS_REGION` from env.
+2. If not configured, say so and show setup instructions.
+3. Show last 10 lines of `~/.waldo/s3-sync.log` (if it exists).
+4. Example output:
+   ```
+   S3 sync: configured
+     Bucket:  my-personas
+     Profile: default
+     Region:  us-east-1
+
+   Last sync log:
+     2026-04-05T14:32:01Z [waldo/s3-sync] pull OK
+   ```
 
 ---
 
