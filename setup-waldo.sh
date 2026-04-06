@@ -128,7 +128,7 @@ mkdir -p "$HOOKS_DIR"
 # Try to get from local repo first, then ensure all required hooks are present (download any missing)
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 REPO_HOOKS="$SCRIPT_DIR/.claude/hooks/waldo"
-REPO_URL="https://raw.githubusercontent.com/caboose-mcp/waldo/demo/dual-domain/.claude/hooks/waldo"
+REPO_URL="https://raw.githubusercontent.com/caboose-mcp/waldo/main/.claude/hooks/waldo"
 
 HOOKS=(
   "inject-persona.sh"
@@ -256,14 +256,25 @@ if [[ $SETUP_S3 =~ ^[Yy]$ ]]; then
       cp "$SETTINGS_FILE" "$BACKUP_FILE"
       chmod 600 "$BACKUP_FILE"
 
-      # Update env vars
-      jq --arg profile "$AWS_PROFILE" --arg region "us-east-1" \
-        '.env.AWS_PROFILE = $profile | .env.AWS_REGION = $region' \
+      # Update env vars — AWS_PROFILE, AWS_REGION, and WALDO_S3_BUCKET
+      # WALDO_S3_BUCKET is read by s3-sync.sh at runtime so hooks need no args
+      jq --arg profile "$AWS_PROFILE" --arg region "us-east-1" --arg bucket "$BUCKET" \
+        '.env = (.env // {}) | .env.AWS_PROFILE = $profile | .env.AWS_REGION = $region | .env.WALDO_S3_BUCKET = $bucket' \
         "$SETTINGS_FILE" > "${SETTINGS_FILE}.tmp" && mv "${SETTINGS_FILE}.tmp" "$SETTINGS_FILE"
       chmod 600 "$SETTINGS_FILE"
 
       echo -e "  ${GREEN}✓ env.AWS_PROFILE = ${AWS_PROFILE}${NC}"
       echo -e "  ${GREEN}✓ env.AWS_REGION = us-east-1${NC}"
+      echo -e "  ${GREEN}✓ env.WALDO_S3_BUCKET = ${BUCKET}${NC}"
+
+      # Wire up SessionStart hook so personas are pulled on every session open.
+      # The hook exits 0 on any failure (graceful), so it never blocks Claude Code.
+      HOOK_CMD="Bash(timeout 15 bash ${HOOKS_DIR}/s3-sync.sh pull &)"
+      jq --arg cmd "$HOOK_CMD" \
+        '.hooks.SessionStart = ((.hooks.SessionStart // []) | if type == "array" then . else [.] end | if index($cmd) == null then . + [$cmd] else . end)' \
+        "$SETTINGS_FILE" > "${SETTINGS_FILE}.tmp" && mv "${SETTINGS_FILE}.tmp" "$SETTINGS_FILE"
+      chmod 600 "$SETTINGS_FILE"
+      echo -e "  ${GREEN}✓ hooks.SessionStart → s3-sync pull${NC}"
     fi
 
     # Test S3 access
