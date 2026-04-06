@@ -347,50 +347,70 @@ Personas automatically sync across machines via S3. No manual export/import need
 
 ### Setup
 
+The easiest path is `setup-waldo.sh` — it handles bucket selection, writes env vars, and wires the `SessionStart` hook automatically.
+
+**Manual setup** (if skipping the installer):
+
 1. **Create an S3 bucket** (or reuse existing one):
    ```bash
    aws s3api create-bucket --bucket my-personas --region us-east-1
    ```
 
-2. **Set AWS profile** in `~/.claude/settings.json`:
+2. **Add env vars and hook** to `~/.claude/settings.json`:
    ```json
    {
      "env": {
        "AWS_PROFILE": "default",
-       "AWS_REGION": "us-east-1"
+       "AWS_REGION": "us-east-1",
+       "WALDO_S3_BUCKET": "my-personas"
+     },
+     "hooks": {
+       "SessionStart": ["Bash(timeout 15 bash ~/.claude/hooks/waldo/s3-sync.sh pull &)"]
      }
    }
    ```
+   `WALDO_S3_BUCKET` is read by `s3-sync.sh` so the hook needs no arguments.
+   The `&` makes it fire-and-forget — it never delays session start.
 
-3. **Hooks are auto-configured:**
-   - `SessionStart`: Pulls latest personas from S3 (async, 15s timeout)
-   - `PostToolUse` after `learn --accumulate`: Pushes updated personas to S3 (async, 15s timeout)
+3. **Guardrails** — before syncing, the hook validates:
+   - `aws` CLI is installed
+   - `WALDO_S3_BUCKET` is set
+   - AWS credentials are valid for the configured profile
+   - The local personas directory exists
+
+   Any check failure logs to `~/.waldo/s3-sync.log` and exits cleanly — sync errors never block a session.
 
 ### Manual Sync
 
 Push current personas to S3:
 ```bash
-bash ~/.claude/hooks/waldo/s3-sync.sh push my-personas default
+bash ~/.claude/hooks/waldo/s3-sync.sh push
+# or with explicit overrides:
+bash ~/.claude/hooks/waldo/s3-sync.sh push my-personas my-profile
 ```
 
 Pull latest from S3:
 ```bash
-bash ~/.claude/hooks/waldo/s3-sync.sh pull my-personas default
+bash ~/.claude/hooks/waldo/s3-sync.sh pull
+# or with explicit overrides:
+bash ~/.claude/hooks/waldo/s3-sync.sh pull my-personas my-profile
 ```
 
-**Note:** `.deltas` and `.cache` directories are excluded from sync (local-only). Only base personas and mood overlays are synced.
+**Note:** `.deltas` and `.cache` are excluded from sync (local-only learning history). Only base personas and mood overlays are synced.
 
 ### Workflow
 
-1. Machine A: Edit persona, run `/waldo learn --accumulate` → personas push to S3 automatically
-2. Machine B: Start new session → SessionStart hook pulls from S3 → you have the latest persona
-3. Cross-machine consistency — no manual sync needed
+1. Machine A: Edit persona, run `/waldo learn --accumulate` → call `s3-sync.sh push` to propagate
+2. Machine B: Start new session → `SessionStart` hook pulls from S3 → you have the latest persona
+3. Cross-machine consistency — pull is automatic; push is explicit after accumulation
 
 ### Error Handling
 
-- **Missing AWS credentials**: Sync logs warning and continues (graceful fallback)
-- **Bucket doesn't exist**: Script logs error but doesn't block session
-- **Permission denied**: Check AWS IAM policy allows `s3:GetObject`, `s3:PutObject`, `s3:DeleteObject` on the bucket
+- **Missing AWS credentials**: Logs warning to `~/.waldo/s3-sync.log`, continues without syncing
+- **`WALDO_S3_BUCKET` not set**: Logs and skips — no sync attempted
+- **Bucket unreachable or empty**: Pull is skipped gracefully; local personas are untouched
+- **Permission denied**: Check IAM policy grants `s3:GetObject`, `s3:PutObject`, `s3:DeleteObject` on the bucket
+- **All errors**: Hook always exits 0 — sync issues never block Claude Code
 
 ---
 
