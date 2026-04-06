@@ -275,9 +275,11 @@ Ask: "What should I name this persona?" then write the file and optionally activ
     },
     "git": {
       "branch_from":          "string — base branch to always cut new branches from (e.g. main)",
+      "sync_base_before_branch": "boolean — pull/update base branch before cutting a new branch",
       "no_direct_push":       "array of strings — branches that must never be pushed to directly (e.g. [main])",
       "commit_convention":    "conventional | none — enforced commit message format",
-      "ai_attribution":       "boolean — include Co-Authored-By AI footer in commits (default: false)"
+      "ai_attribution":       "boolean — include Co-Authored-By AI footer in commits (default: false)",
+      "pre_push_doc_check":   "boolean — review in-code comments and README for needed updates before pushing"
     }
   }
 }

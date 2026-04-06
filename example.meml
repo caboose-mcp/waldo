@@ -46,7 +46,9 @@ steps    = ["owasp_top10_review", "lint", "test", "build"]
 note     = ~
 
 [git]
-branch_from       = "main"
-no_direct_push    = ["main"]
-commit_convention = "conventional"
-ai_attribution    = ❌
+branch_from             = "main"
+sync_base_before_branch = ✅
+no_direct_push          = ["main"]
+commit_convention       = "conventional"
+ai_attribution          = ❌
+pre_push_doc_check      = ✅
