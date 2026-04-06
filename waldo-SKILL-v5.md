@@ -266,6 +266,19 @@ Ask: "What should I name this persona?" then write the file and optionally activ
     "prefer_words":   "array of strings — use these over synonyms",
     "sign_off":       "string or null",
     "attribution":    "boolean — include AI agent attribution (default: false)"
+  },
+  "workflow": {
+    "pre_pr": {
+      "required": "boolean — whether the checklist is enforced before creating/updating a PR",
+      "steps":    "array of strings — ordered steps to run (e.g. owasp_top10_review, lint, test, build)",
+      "note":     "string or null — optional context shown alongside the checklist"
+    },
+    "git": {
+      "branch_from":          "string — base branch to always cut new branches from (e.g. main)",
+      "no_direct_push":       "array of strings — branches that must never be pushed to directly (e.g. [main])",
+      "commit_convention":    "conventional | none — enforced commit message format",
+      "ai_attribution":       "boolean — include Co-Authored-By AI footer in commits (default: false)"
+    }
   }
 }
 ```
