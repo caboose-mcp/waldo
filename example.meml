@@ -38,3 +38,16 @@ line_length        = 42
 words_per_minute   = 160
 pacing_indicators  = ❌
 caption_format     = "srt"
+
+[⚙️ workflow.pre_pr]
+required = ✅
+steps    = ["owasp_top10_review", "lint", "test", "build"]
+note     = ~
+
+[⚙️ workflow.git]
+branch_from             = "main"
+sync_base_before_branch = ✅
+no_direct_push          = ["main"]
+commit_convention       = "conventional"
+ai_attribution          = ❌
+pre_push_doc_check      = ✅
