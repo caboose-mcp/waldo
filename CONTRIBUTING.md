@@ -2,6 +2,14 @@
 
 ## Local Development Setup
 
+### Install Go binaries
+
+```bash
+go install ./cmd/...
+```
+
+This installs: `waldo-tui`, `waldo-status`, `waldo-cursor-sync`, `waldo-zed-sync`, `waldo-project`, `waldo-registry`, `waldo-setup-ask-a-dev`.
+
 ### Install lefthook
 
 waldo uses **lefthook** for pre-commit checks (lint, validate, shellcheck).
@@ -97,8 +105,7 @@ Smoke tests run in CI. To test locally:
 
 ```bash
 export HOME=/tmp/test-home
-mkdir -p "$HOME/.claude/personas/agent"
-mkdir -p "$HOME/.config/waldo"
+mkdir -p "$HOME/.config/waldo/personas/agent"
 echo "agent/default" > "$HOME/.config/waldo/.active"
 bash .claude/hooks/waldo/status-line.sh
 ```

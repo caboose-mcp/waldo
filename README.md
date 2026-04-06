@@ -79,6 +79,7 @@ See [example.meml](./example.meml) for a full example.
 | `/waldo list` | Show all personas, mark active |
 | `/waldo use <name>` | Switch persona |
 | `/waldo new <name>` | Create manually |
+| `/waldo edit <name>` | Edit an existing persona |
 | `/waldo slack-import` | Generate from Slack messages |
 | `/waldo mood <desc>` | Temp tone overlay (happier, pissed, professional, etc.) |
 | `/waldo mood save` | Keep mood forever |
@@ -86,31 +87,54 @@ See [example.meml](./example.meml) for a full example.
 | `/waldo learn` | Analyze conversation, suggest updates |
 | `/waldo code-scan <path>` | Detect code style conventions |
 | `/waldo code-style` | View code conventions |
+| `/waldo code-learn` | Analyze code in session, suggest style updates |
 | `/waldo export <name>` | Share persona as JSON |
 | `/waldo import` | Paste JSON from someone else |
+| `/waldo sync push` | Push personas to S3 |
+| `/waldo sync pull` | Pull personas from S3 |
+| `/waldo sync status` | Show S3 sync config and last sync log |
 
 ## Agent Support
 
 | Tool | Support | Notes |
 |------|---------|-------|
 | **Claude Code** | ✅ Full | Native hook integration |
-| **Cursor** | ✅ Full | Workspace rules sync |
-| **ChatGPT** | ✅ Manual | Copy hooks, use `/waldo` commands |
+| **Cursor** | ✅ Full | `waldo-cursor-sync` writes `.cursorrules` |
+| **Zed** | ✅ Full | `waldo-zed-sync` writes `.rules` for AI Agent Panel |
+| **ChatGPT** | ✅ Manual | Export persona JSON, paste as system prompt |
 | **Gemini** | ✅ Manual | Same as ChatGPT |
 | **Codeium** | ✅ Manual | Same as ChatGPT |
 
 ## Architecture
 
-**Core:** `~/.claude/personas/`
-- `agent/` — response personas (`.json` + `.meml`)
-- `code/` — code style profiles
+**Core:** `~/.config/waldo/`
 - `.active` — current persona name (e.g. `agent/my-voice`)
-- `agent/.deltas` — learning history for agent personas
-- `code/.deltas` — learning history for code personas
+- `personas/agent/` — response personas (`.json` + `.meml`)
+- `personas/code/` — code style profiles
+- `personas/agent/.deltas` — learning history for agent personas
+- `personas/code/.deltas` — learning history for code personas
+
+**Current Claude hook/installer compatibility:** the shipped installer and hook scripts still use `~/.claude/personas` as the persona directory. S3 config (`WALDO_S3_BUCKET`, `AWS_PROFILE`) is stored in `~/.claude/settings.json`, and the active persona also falls back to `~/.claude/personas/.active` for backwards compatibility.
+
+If you are using the current Claude/Cursor/Zed hook scripts from this repo, keep personas in sync between `~/.config/waldo/personas/` and `~/.claude/personas/` until those hooks are migrated to the new layout.
 
 **Adapters:**
 - **Claude Code** — `UserPromptSubmit` hook in `~/.claude/settings.json`
-- **Cursor** — workspace rules update on session start
+- **Cursor** — `.cursorrules` file in project root via `waldo-cursor-sync`
+- **Zed** — `.rules` file in project root via `waldo-zed-sync`
+
+**CLI binaries** (build/install separately; not installed by `setup-waldo.sh`):
+
+Install from the repository root with `go install ./cmd/...` or build the individual commands you need.
+
+| Binary | Status / What It Does |
+|--------|------------------------|
+| `waldo-tui` | Interactive TUI: S3 bucket picker, script fetch/inspect, status |
+| `waldo-status` | Terminal status bar (git branch + build + persona) |
+| `waldo-cursor-sync` | Sync active persona to `.cursorrules` in current project |
+| `waldo-zed-sync` | Sync active persona to `.rules` for Zed AI Agent Panel |
+| `waldo-project` | Scaffold new projects using persona templates (stub, v0.3) |
+| `waldo-registry` | Planned persona marketplace with Hanko auth (v1.1) |
 
 **Format:** MEML config with emoji annotations for readability and tooling hints.
 
@@ -132,7 +156,6 @@ bash setup-waldo.sh
 # Or manually
 mkdir -p ~/.claude/personas/{agent,code}
 curl -fsSL https://raw.githubusercontent.com/caboose-mcp/waldo/main/example.meml > ~/.claude/personas/agent/default.meml
-echo "agent/default" > ~/.claude/personas/.active
 mkdir -p ~/.config/waldo
 echo "agent/default" > ~/.config/waldo/.active
 ```
@@ -236,13 +259,16 @@ aws s3 ls s3://my-personas/
 **Lost a persona?**
 
 ```bash
-ls ~/.claude/personas/agent/*.backup.*
+ls ~/.config/waldo/personas/agent/*.backup.*
 # Restore: cp persona.json.backup.TIMESTAMP persona.json
 ```
 
 ## Development
 
 ```bash
+# Install all Go binaries
+go install ./cmd/...
+
 # Test setup script
 bash setup-waldo.sh
 
